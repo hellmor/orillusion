@@ -55,7 +55,7 @@ export class MeshRenderer extends RenderNode {
             this.onCompute = null;
         }
 
-        this.object3D.bound = this._geometry.bounds;
+        this.object3D.bound = this._geometry.bounds.clone();
 
         if (this._readyPipeline) {
             this.initPipeline();
@@ -125,11 +125,13 @@ export class MeshRenderer extends RenderNode {
         super.nodeUpdate(view, passType, renderPassState, clusterLightingBuffer);
     }
 
-    public destroy(): void {
-        this.geometry.destroy();
-        this.materials.forEach(mat => {
-            mat.destroy();
-        });
+    public destroy(force?: boolean): void {
+        if (force) {
+            this.geometry.destroy(force);
+            this.materials.forEach(mat => {
+                mat.destroy(force);
+            });
+        }
         super.destroy();
     }
 
