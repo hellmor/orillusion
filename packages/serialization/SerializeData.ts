@@ -21,7 +21,7 @@ export class SerializeIndex {
 
 export class SerializeComponentBase extends SerializeIndex {
     public enable: boolean;
-    public componentType: string;
+    public className: string;
     public data?: any;
 }
 

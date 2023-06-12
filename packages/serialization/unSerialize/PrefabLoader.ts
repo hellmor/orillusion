@@ -224,7 +224,7 @@ export class PrefabLoader extends ParserBase {
 
     private parseComponent(owner: Object3D, componentData: SerializeComponentBase) {
         let componentBase: ComponentBase;
-        let cls = SerializationTypes.getClass(componentData.componentType);
+        let cls = SerializationTypes.getClass(componentData.className);
         if (cls) {
             componentBase = owner.getOrAddComponent(cls);
             UnSerializationUtil.unSerialize(componentBase, componentData, this.assets);

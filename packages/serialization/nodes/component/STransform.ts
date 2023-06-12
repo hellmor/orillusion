@@ -11,7 +11,7 @@ export class STransform extends SerializeComponentBase {
 
         let data: SerializeTransform = new SerializeTransform();
         data.enable = transform.enable;
-        data.componentType = SerializationTypes.getClassName(target)
+        data.className = SerializationTypes.getClassName(target)
 
         // data.quaternion = SerializeProtoData.writeVector4(transform._localRotQuat);
         data.euler = SerializeProtoData.writeVector3(transform.localRotation);

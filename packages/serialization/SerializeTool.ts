@@ -50,11 +50,11 @@ export class SerializeTool {
         let children: number[];
         if (object3D.prefabRef) {
             this.appendPrefabRef(object3D.prefabRef);
-        } else if (object3D.serializeTag != "only-self") {
+        } else if (object3D.serializeTag != "self") {
             if (object3D.entityChildren.length > 0) {
                 for (const child of object3D.entityChildren) {
                     if (child instanceof Object3D) {
-                        if (child.serializeTag != 'dont-serialize') {
+                        if (child.serializeTag != 'non') {
                             let childData: SerializeObject3D = this.writeObject3D(child);
                             children ||= [];
                             children.push(childData.index);

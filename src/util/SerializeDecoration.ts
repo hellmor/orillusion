@@ -1,5 +1,5 @@
 
-export type SerializeTag = null | 'self' | 'none';
+export type SerializeTag = null | 'self' | 'non';
 
 export function NonSerialize(cls, key): any {
     let dic = cls['__NonSerialize__'];

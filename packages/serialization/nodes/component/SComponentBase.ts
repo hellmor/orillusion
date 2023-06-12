@@ -24,7 +24,7 @@ export class SComponentBase implements SerializeAble {
         if (className.indexOf("_") >= 0) {
             className = SerializationTypes.getClassName(target);
         }
-        dst.componentType = className;
+        dst.className = className;
         return dst;
     }
 

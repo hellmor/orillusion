@@ -55,11 +55,11 @@ export class SerializeAssetsCollect implements ISerializeAssetsCollect {
         })
 
         //children
-        if (object3D.serializeTag != "only-self" && !object3D.prefabRef) {
+        if (object3D.serializeTag != "self" && !object3D.prefabRef) {
             if (object3D.entityChildren.length > 0) {
                 for (const child of object3D.entityChildren) {
                     if (child instanceof Object3D) {
-                        if (child.serializeTag != 'dont-serialize') {
+                        if (child.serializeTag != 'non') {
                             this.collectAssetsOfObject3D(child);
                         }
                     }

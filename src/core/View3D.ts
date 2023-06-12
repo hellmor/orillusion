@@ -1,3 +1,4 @@
+import { NonSerialize } from "..";
 import { GUIPick } from "../components/gui/GUIPick";
 import { GUICanvas } from "../components/gui/core/GUICanvas";
 import { CEventListener } from "../event/CEventListener";
@@ -22,7 +23,7 @@ export class View3D extends CEventListener {
     /**
     * Graphics renderers (lines, rectangles, etc.)
     */
-    public graphic3D: Graphic3D;
+    @NonSerialize public graphic3D: Graphic3D;
 
     constructor(x: number = 0, y: number = 0, width: number = 0, height: number = 0) {
         super();
