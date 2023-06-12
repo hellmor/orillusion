@@ -29,7 +29,6 @@ export class BoxGeometry extends GeometryBase {
      */
     constructor(width: number = 1, height: number = 1, depth: number = 1) {
         super();
-        // this.geometrySource = new SerializeGeometrySource().setPrimitive('primitive-box');
         this.width = width;
         this.height = height;
         this.depth = depth;

@@ -8,6 +8,7 @@ import { GPUContext } from '../gfx/renderJob/GPUContext';
 import { StringUtil } from '../util/StringUtil';
 import { BitmapTexture2D } from './BitmapTexture2D';
 import { VirtualTexture } from './VirtualTexture';
+import { TextureAsset } from '../gfx/graphics/webGpu/core/texture/TextureAsset';
 
 /**
  * @group Texture
@@ -171,6 +172,7 @@ export class BitmapTextureCube extends TextureCube {
      */
     public async load(urls: string[]) {
         this._url = urls;
+        this.asset = new TextureAsset().setCubeFace6(urls);
         let remain: number = 6;
         let bitmaps: ImageBitmap[] = [];
         this.format = GPUTextureFormat.rgba8unorm;
@@ -202,6 +204,7 @@ export class BitmapTextureCube extends TextureCube {
       */
     public async loadStd(url: string) {
         this._url = url;
+        this.asset = new TextureAsset().setCubeStd(url);
         this.format = GPUTextureFormat.rgba8unorm;
 
         const img = document.createElement('img');

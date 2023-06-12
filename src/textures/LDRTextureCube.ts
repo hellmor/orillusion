@@ -6,6 +6,7 @@ import { Texture } from "../gfx/graphics/webGpu/core/texture/Texture";
 import { TextureCube } from "../gfx/graphics/webGpu/core/texture/TextureCube";
 import { LoaderFunctions } from "../loader/LoaderFunctions";
 import { BitmapTexture2D } from "./BitmapTexture2D";
+import { TextureAsset } from "../gfx/graphics/webGpu/core/texture/TextureAsset";
 
 /**
  * LDRTextureCube: create a cube texture, it's low dynamic range texture
@@ -37,6 +38,7 @@ export class LDRTextureCube extends TextureCube {
     */
     public async load(url: string, loaderFunctions?: LoaderFunctions): Promise<LDRTextureCube> {
         this._url = url;
+        this.asset = new TextureAsset().setCubeLDR(url);
         let bitmapTexture: BitmapTexture2D = new BitmapTexture2D(false);
         await bitmapTexture.load(url, loaderFunctions);
         this.createFromLDRTexture(bitmapTexture);

@@ -1,6 +1,7 @@
 import { GPUAddressMode } from '../../WebGPUConst';
 import { TextureMipmapGenerator } from './TextureMipmapGenerator';
 import { webGPUContext } from '../../Context3D';
+import { TextureAsset } from './TextureAsset';
 
 /**
  * Texture
@@ -88,7 +89,7 @@ export class Texture implements GPUSamplerDescriptor {
      */
     public visibility: number = GPUShaderStage.COMPUTE | GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT;
 
-
+    public asset?: TextureAsset;
     /**
      * GPUTextureBindingLayout, contains viewDimension and multisampled
      */

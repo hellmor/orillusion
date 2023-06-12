@@ -373,6 +373,11 @@ export class Res {
     public defaultGUITexture: GUITexture;
     public defaultGUISprite: GUISprite;
 
+    private _defaultTexture: Map<string, Texture>;
+
+    public isDefaultTexture(name: string): Texture {
+        return this._defaultTexture?.get(name);
+    }
     /**
      * create a texture
      * @param width width of texture
@@ -385,6 +390,7 @@ export class Res {
      * @returns
      */
     public createTexture(width: number, height: number, r: number, g: number, b: number, a: number, name?: string) {
+        this._defaultTexture ||= new Map<string, Texture>();
         let w = 32;
         let h = 32;
         let textureData = new Uint8Array(w * h * 4);
@@ -394,6 +400,7 @@ export class Res {
         texture.create(16, 16, textureData, true);
         if (name) {
             this.addTexture(name, texture);
+            this._defaultTexture.set(name, texture);
         }
         return texture;
     }

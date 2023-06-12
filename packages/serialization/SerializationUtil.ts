@@ -1,46 +1,51 @@
+import { IsNonSerialize } from "../../src/util/ClassDecoration";
+import { ISerializeAssetsCollect } from "./ISerializeAssetsCollect";
 import { SerializationTypes } from "./SerializationTypes";
 
 export class SerializationUtil {
-    private static _cache: Map<any, boolean>;
 
-    public static serialization(source: any, out?: any) {
-        if (!source) return null;
+    public static serialization(source: any, assets: ISerializeAssetsCollect): any {
         SerializationTypes.registerAll();
 
-        this._cache ||= new Map<any, boolean>();
-        this._cache.clear();
-
-        out = out ? out : {};
-        this._cache.set(source, true);
-
-        let ins = source;
-        if (ins && ins.constructor.name) {
-            let util = SerializationTypes.getSerializeClass(ins.constructor.name);
-            if (util) {
-                util.serialize(ins, out);
-                this._cache.set(ins, true);
-            } else {
-                for (const key in source) {
-                    if (key.indexOf("_") == 0) {
-                        continue;
-                    }
-                    this.serializationNode(source, key, out);
-                }
-            }
+        let util = SerializationTypes.getSerializeByInstance(source);
+        if (util) {
+            return util.serialize(source, assets);
+        } else {
+            return this.serialization2(source, assets);
         }
-        return out;
     }
 
-    public static serializationNode(source: any, property: string, data: any) {
-        let ins = source[property];
-        if (ins && ins.constructor.name && !this._cache.get(ins)) {
-            let util = SerializationTypes.getSerializeClass(ins.constructor.name);
-            if (util) {
-                let new_data = data[property] = {};
-                util.serialize(ins, new_data);
+    public static serialization2(source: any, assets: ISerializeAssetsCollect, dst?): any {
+        if (!dst) dst = {};
 
-                this._cache.set(ins, true);
+        for (const key in source) {
+            if (key.indexOf('_') != -1)
+                continue;
+            let noSerialize = IsNonSerialize(source, key)
+            if (noSerialize) {
+                continue;
             }
+            this.serializationNode(source, assets, key, dst);
         }
+        return dst;
+    }
+
+    public static serializationNode(source: any, assets: ISerializeAssetsCollect, property: string, dst: any) {
+        let ins = source[property];
+
+        if (ins) {
+            let t = typeof ins;
+            if (t == 'string' || t == 'number' || t == 'boolean') {
+                dst[property] = ins;
+            } else {
+                let util = SerializationTypes.getSerializeByInstance(ins);
+                if (util) {
+                    dst[property] = util.serialize(ins, assets);
+                }
+            }
+
+
+        }
+        return dst;
     }
 }

@@ -19,7 +19,7 @@ class Sample_Serialization {
         // console.log(b);
 
         let cClass = new Object3D();
-        let c = SerializationUtil.serialization(cClass);
+        let c = SerializationUtil.serialization(cClass, null);
         console.log(c);
 
     }

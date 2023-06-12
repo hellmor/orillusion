@@ -8,6 +8,8 @@ import { GeometryIndicesBuffer } from "./GeometryIndicesBuffer";
 import { GeometryVertexType } from "./GeometryVertexType";
 import { VertexAttributeData } from "./VertexAttributeData";
 import { ArrayBufferData } from "../../gfx/graphics/webGpu/core/buffer/ArrayBufferData";
+import { GeometryAsset } from "./GeometryAsset";
+import { NonSerialize } from "../../util/ClassDecoration";
 
 export type LodLevel = {
     indexStart: number;
@@ -26,12 +28,13 @@ export class SubGeometry {
 }
 
 
+
 /**
  * @group Geometry
  */
 export class GeometryBase {
 
-    public uuid: string;
+    @NonSerialize public uuid: string;
     public name: string;
     public subGeometries: SubGeometry[] = [];
     public morphTargetsRelative: boolean;
@@ -42,6 +45,7 @@ export class GeometryBase {
     private _attributes: string[];
     private _indicesBuffer: GeometryIndicesBuffer;
     private _vertexBuffer: GeometryVertexBuffer;
+    public asset?: GeometryAsset;
     constructor() {
         this.uuid = UUID();
 
@@ -259,10 +263,6 @@ export class GeometryBase {
         this._vertexBuffer.upload(VertexAttributeName.normal, normalAttrData);
 
         return this;
-    }
-
-    public isPrimitive(): boolean {
-        return false;// this.geometrySource != null && this.geometrySource.type != 'none';
     }
 
     destroy(force?: boolean) {

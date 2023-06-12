@@ -12,7 +12,7 @@ import { ComponentCollect } from '../../gfx/renderJob/collect/ComponentCollect';
 export class Object3D extends Entity {
     protected _isScene3D: boolean;
     public prefabRef?: string;
-
+    public serializeTag?: string;
     /**
      * Instantiate a 3D object
      */

@@ -40,7 +40,6 @@ export class PlaneGeometry extends GeometryBase {
      */
     constructor(width: number, height: number, segmentW: number = 1, segmentH: number = 1, up: Vector3 = Vector3.Y_AXIS) {
         super();
-        // this.geometrySource = new SerializeGeometrySource().setPrimitive('primitive-plane');
         this.width = width;
         this.height = height;
         this.segmentW = segmentW;

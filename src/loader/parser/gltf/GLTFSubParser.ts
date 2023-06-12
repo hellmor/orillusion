@@ -283,7 +283,7 @@ export class GLTFSubParser {
         if (!this._converter) {
             this._converter = new GLTFSubParserConverter(this);
         }
-        return this._converter.convertNodeToObject3D(nodeInfo, parentNode);
+        return this._converter.convertNodeToObject3D(this.initUrl, nodeInfo, parentNode);
     }
 
     public parseSkeleton(skeletonID) {

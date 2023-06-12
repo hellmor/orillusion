@@ -1,3 +1,4 @@
+import { TextureAsset } from '../../../gfx/graphics/webGpu/core/texture/TextureAsset';
 import { BitmapTexture2D } from '../../../textures/BitmapTexture2D';
 import { ParserBase } from '../ParserBase';
 import { GLTF_Info } from './GLTFInfo';
@@ -92,6 +93,7 @@ export class GLBParser extends ParserBase {
                 let dataBuffer = new Uint8Array(buffer.dbuffer, bufferView.byteOffset, bufferView.byteLength);
                 let imgData = new Blob([dataBuffer], { type: image.mimeType });
                 let dtexture = new BitmapTexture2D();
+                dtexture.asset = new TextureAsset().setGLBImage(this.initUrl, i);
                 await dtexture.loadFromBlob(imgData);
                 dtexture.name = image.name;
                 this._gltf.resources[image.name] = dtexture;

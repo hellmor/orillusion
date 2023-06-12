@@ -5,6 +5,7 @@ import { GPUContext } from '../gfx/renderJob/GPUContext';
 import { FileLoader } from '../loader/FileLoader';
 import { LoaderFunctions } from '../loader/LoaderFunctions';
 import { RGBEParser } from '../loader/parser/RGBEParser';
+import { TextureAsset } from '../gfx/graphics/webGpu/core/texture/TextureAsset';
 /**
  * HDR Texture
  * @group Texture
@@ -23,7 +24,7 @@ export class HDRTexture extends Texture {
      * @param useMipmap gen mipmap or not
      * @returns
      */
-    public create(width: number = 32, height: number = 32, data: ArrayBuffer = null, useMipmap: boolean = true): this {
+    protected create(width: number = 32, height: number = 32, data: ArrayBuffer = null, useMipmap: boolean = true): this {
         this.width = width;
         this.height = height;
         let device = webGPUContext.device;
@@ -82,7 +83,9 @@ export class HDRTexture extends Texture {
      */
     public async load(url: string, loaderFunctions?: LoaderFunctions): Promise<HDRTexture> {
         let loader = new FileLoader();
+        this.asset = new TextureAsset().setHDRNetImage(url);
         let parser = await loader.load(url, RGBEParser, loaderFunctions);
-        return parser.getHDRTexture();
+        let data = parser.getTextureData();
+        return this.create(data.width, data.height, data.array);
     }
 }
