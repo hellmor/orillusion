@@ -1,4 +1,4 @@
-import { AtmosphericComponent, AtmosphericScatteringSky, BoxGeometry, Camera3D, ColliderComponent, ComponentBase, CylinderGeometry, Depth2DTextureArray, DirectLight, GeometryBase, HoverCameraController, LDRTextureCube, LightBase, MaterialBase, MeshRenderer, Object3D, PlaneGeometry, PointLight, RenderNode, Scene3D, SkyRenderer, SolidColorSky, SphereGeometry, SpotLight, Texture, TorusGeometry, Transform, Vector2, Vector3, Vector4, VirtualTexture } from "@orillusion/core";
+import { AtmosphericComponent, AtmosphericScatteringSky, BoxGeometry, Camera3D, ColliderComponent, ComponentBase, CylinderGeometry, Depth2DTextureArray, DirectLight, GeometryBase, HoverCameraController, LDRTextureCube, LightBase, MaterialBase, MeshRenderer, Object3D, PlaneGeometry, PointLight, RenderNode, Scene3D, SkyRenderer, SolidColorSky, SphereGeometry, SpotLight, Texture, TorusGeometry, Transform, Vector2, Vector3, Vector4, View3D, VirtualTexture } from "@orillusion/core";
 import { SObject3D, SScene3D } from "./nodes/SObject3D";
 import { STransform } from "./nodes/component/STransform";
 import { SVector2D } from "./nodes/SVector2D";
@@ -13,22 +13,27 @@ import { SComponentBase } from "./nodes/component/SComponentBase";
 import { SRenderNode, SMeshRenderer, SSkyRenderer, SAtmosphericComponent } from "./nodes/component/SRenderNode";
 import { SDirectLight, SSpotLight, SPointLight, SLightBase } from "./nodes/component/SLightBase";
 import { SColliderComponent } from "./nodes/component/SColliderComponent";
+import { SView3D } from "./nodes/SView3D";
 
 export class SerializationTypes {
+    private static _nameToSerializeClass: Map<string, any>;
     private static _nameToClass: Map<string, any>;
     public static registerAll() {
-        this._nameToClass ||= this.doRegister();
+        this._nameToSerializeClass ||= this.doRegister();
     }
 
     private static doRegister(): Map<string, any> {
+        this._nameToSerializeClass = new Map<string, any>();
         this._nameToClass = new Map<string, any>();
-
         //node
         this.register("Object3D", Object3D, new SObject3D());
         this.register("Scene3D", Scene3D, new SScene3D());
 
         //component
         this.register("ComponentBase", ComponentBase, new SComponentBase());
+        this.register("HoverCameraController", HoverCameraController, new SComponentBase());
+
+
         this.register("Transform", Transform, new STransform());
         this.register("Camera3D", Camera3D, new SCamera3D());
         this.register("RenderNode", RenderNode, new SRenderNode());
@@ -51,6 +56,9 @@ export class SerializationTypes {
         //material
         this.register("Material", MaterialBase, new SMaterial());
 
+        //view3D
+        this.register("View3D", View3D, new SView3D());
+
         //geometry
         this.register('GeometryBase', GeometryBase, new SGeometryBase());
         // this.register('BoxGeometry', BoxGeometry, new SGeometryBase());
@@ -67,12 +75,17 @@ export class SerializationTypes {
         this.register('VirtualTexture', VirtualTexture, new SVirtualTexture());
         this.register('SolidColorSky', SolidColorSky, new SSolidColorSky());
 
-        return this._nameToClass;
+        return this._nameToSerializeClass;
     }
-    private static register(name: string, cls: any, so: SerializeAble): void {
-        this._nameToClass.set(name, so);
-        cls.prototype['__NailSerialize__'] = so;
+    private static register(name: string, cls: any, serialize: SerializeAble): void {
+        this._nameToSerializeClass.set(name, serialize);
+        this._nameToClass.set(name, cls);
+        cls.prototype['__NailSerialize__'] = serialize;
         cls.prototype['__NailClassName__'] = name;
+    }
+
+    public static getClass(name: string) {
+        return this._nameToClass.get(name);
     }
 
     public static getClassName(instance: any): string {
@@ -88,6 +101,6 @@ export class SerializationTypes {
     }
 
     public static getSerializeByName(name: string): SerializeAble {
-        return this._nameToClass.get(name);
+        return this._nameToSerializeClass.get(name);
     }
 }

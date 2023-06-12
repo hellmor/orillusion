@@ -1,4 +1,4 @@
-import { IsNonSerialize } from "../../src/util/ClassDecoration";
+import { IsNonSerialize } from "../../src/util/SerializeDecoration";
 import { ISerializeAssetsCollect } from "./ISerializeAssetsCollect";
 import { SerializationTypes } from "./SerializationTypes";
 

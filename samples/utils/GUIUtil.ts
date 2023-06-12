@@ -1,5 +1,5 @@
 import { GUIHelp } from "@orillusion/debug/GUIHelp";
-import { AtmosphericComponent, BillboardType, Color, DirectLight, Engine3D, GPUCullMode, GlobalIlluminationComponent, PointLight, SpotLight, Transform, UIImage, UIPanel, UIShadow, View3D } from "@orillusion/core";
+import { AtmosphericComponent, BillboardType, Color, DirectLight, Engine3D, GPUCullMode, GTAOSetting, GlobalIlluminationComponent, PointLight, SpotLight, Transform, UIImage, UIPanel, UIShadow, View3D } from "@orillusion/core";
 import { UVMoveComponent } from "@samples/material/script/UVMoveComponent";
 
 export class GUIUtil {
@@ -50,6 +50,24 @@ export class GUIUtil {
         GUIHelp.add(light, 'intensity', 0.0, 160.0, 0.01);
         GUIHelp.add(light, 'indirect', 0.0, 10.0, 0.01);
         GUIHelp.add(light, 'castShadow');
+
+        open && GUIHelp.open();
+        GUIHelp.endFolder();
+    }
+
+    public static renderGTAO(setting: GTAOSetting, maxDistance: number, open: boolean = true, name?: string) {
+        name ||= 'GTAO';
+        GUIHelp.addFolder(name);
+
+        setting.maxDistance = maxDistance * 0.5;
+        setting.maxPixel = 40;
+
+        GUIHelp.add(setting, 'maxDistance', 0.1, maxDistance, 0.01);
+        GUIHelp.add(setting, 'maxPixel', 1, 100, 1);
+        GUIHelp.add(setting, 'darkFactor', 0, 1, 0.01);
+        GUIHelp.add(setting, 'rayMarchSegment', 1, 8, 1);
+        GUIHelp.add(setting, 'multiBounce');
+        GUIHelp.add(setting, 'blendColor');
 
         open && GUIHelp.open();
         GUIHelp.endFolder();

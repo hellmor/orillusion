@@ -22,7 +22,7 @@ export class SerializeMaterialInstance extends SerializeIndex {
 
 export class SerializeTextureInstance extends SerializeIndex {
     public data?: any;
-    public textureSource: TextureAsset;
+    public asset: TextureAsset;
     public compare: GPUCompareFunction;
     public minFilter: GPUFilterMode;
     public magFilter: GPUFilterMode;

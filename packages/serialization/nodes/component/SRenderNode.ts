@@ -23,7 +23,7 @@ export class SRenderNode extends SComponentBase {
 }
 
 export class SMeshRenderer extends SRenderNode {
-    unSerialize(target: MeshRenderer, componentData: SerializeComponentBase, data: UnSerializeData): void {
+    unSerialize(target: MeshRenderer, componentData: SerializeComponentBase, data: UnSerializeData): MeshRenderer {
         let cData: SerializeRendererNode = componentData as SerializeRendererNode;
         target.geometry = data.geometries[cData.geometry];
         let materials: MaterialBase[] = [];
@@ -31,30 +31,31 @@ export class SMeshRenderer extends SRenderNode {
             materials.push(data.materials[material]);
         }
         target.materials = materials;
+        return target;
     }
 }
 
 
 export class SSkyRenderer extends SRenderNode {
 
-    unSerialize(target: any, componentData: SerializeComponentBase, data: UnSerializeData): void {
-        let component = target as SkyRenderer;
+    unSerialize(target: SkyRenderer, componentData: SerializeComponentBase, data: UnSerializeData): SkyRenderer {
         let cData: SerializeSkyRenderer = componentData as SerializeSkyRenderer;
 
-        component.map = data.textureList[cData.envMap];
-        component.geometry = data.geometries[cData.geometry];
-        component.roughness = cData.roughness;
-        component.exposure = cData.exposure;
+        target.map = data.textureList[cData.envMap];
+        target.geometry = data.geometries[cData.geometry];
+        target.roughness = cData.roughness;
+        target.exposure = cData.exposure;
+        return target;
     }
 
-    serialize(component: SkyRenderer, assets: ISerializeAssetsCollect): SerializeComponentBase {
+    serialize(target: SkyRenderer, assets: ISerializeAssetsCollect): SerializeComponentBase {
         let data: SerializeSkyRenderer = new SerializeSkyRenderer();
-        this.serializeBase(component, data);
+        this.serializeBase(target, data);
         //geometry
-        data.geometry = assets.getGeometryIndex(component.geometry);
-        data.roughness = component.roughness;
-        data.exposure = component.exposure;
-        data.envMap = assets.getTextureIndex(component.map);
+        data.geometry = assets.getGeometryIndex(target.geometry);
+        data.roughness = target.roughness;
+        data.exposure = target.exposure;
+        data.envMap = assets.getTextureIndex(target.map);
         return data;
     }
 }
@@ -68,8 +69,7 @@ export class SAtmosphericComponent extends SComponentBase {
         return data;
     }
 
-    public unSerialize(target: any, componentData: SerializeComponentBase, data: UnSerializeData) {
-        let transform = target as AtmosphericComponent;
-        transform.enable = componentData.enable;
+    public unSerialize(target: AtmosphericComponent, componentData: SerializeComponentBase, data: UnSerializeData) {
+        target.enable = componentData.enable;
     }
 }

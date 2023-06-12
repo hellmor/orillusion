@@ -1,4 +1,4 @@
-import { Object3D } from "@orillusion/core";
+import { Object3D, Scene3D } from "@orillusion/core";
 import { ISerializeAssetsCollect } from "../ISerializeAssetsCollect";
 import { SerializationUtil } from "../SerializationUtil";
 import { SerializeAble, SerializeComponentBase, SerializeObject3D, SerializeScene3D } from "../SerializeData";
@@ -34,18 +34,17 @@ export class SObject3D extends SerializeAble {
 
 export class SScene3D extends SObject3D {
 
-    serialize(target: any, assets: ISerializeAssetsCollect): SerializeObject3D {
+    serialize(target: Scene3D, assets: ISerializeAssetsCollect): SerializeObject3D {
         let data: SerializeScene3D = new SerializeScene3D();
         this.serializeObject3D(target, assets, data);
         data.isScene3D = true;
-        // data.skyRenderer = this.skyRender.serialization(assets) as any;
+        data.envMap = assets.getTextureIndex(target.envMap);
         return data;
     }
 
-    unSerialize(target: any, nodeData: SerializeObject3D, data: UnSerializeData) {
+    unSerialize(target: Scene3D, nodeData: SerializeObject3D, data: UnSerializeData) {
         super.unSerialize(target, nodeData, data);
-        let sceneData = nodeData as SerializeScene3D;
-        // this.skyRender.unSerialization(sceneData.skyRenderer, data);
-        // this.envMap = this.skyRender.map;
+        target.envMap = data.textureList[nodeData.envMap];
+        data.scene = target;
     }
 }

@@ -31,7 +31,7 @@ export class PointLight extends LightBase {
      * @return {number}
      */
     public get range(): number {
-        return this.lightData.range as number;
+        return this.lightData.range;
     }
     /**
      *

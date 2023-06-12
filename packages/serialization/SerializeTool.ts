@@ -29,7 +29,8 @@ export class SerializeTool {
         this.writeVersion();
         this.writeObject3Ds(object3D);
         if (object3D.isScene3D) {
-            this.writeRender();
+            this.writeView3DList();
+            this.writeEngineSetting();
         }
     }
 
@@ -67,7 +68,7 @@ export class SerializeTool {
         return data;
     }
 
-    private writeRender(): void {
+    private writeEngineSetting(): void {
         let dataString = JSON.stringify(Engine3D.setting);
         let dataObj = JSON.parse(dataString);
         //丢弃一些设定数据
@@ -77,6 +78,14 @@ export class SerializeTool {
         delete dataObj['pick'];
         //存储engineSetting
         this.data.engineSetting = dataObj;
+    }
+
+    private writeView3DList(): void {
+        this.data.view3DList = [];
+        for (let view of Engine3D.views) {
+            let item = SerializationUtil.serialization(view, this.assets);
+            this.data.view3DList.push(item);
+        }
     }
 
     private writeDependency() {

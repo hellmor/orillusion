@@ -4,6 +4,7 @@ import { UnSerializeData } from "@orillusion/serialization/unSerialize/UnSeriali
 import { ComponentBase } from "@orillusion/core";
 import { SerializationTypes } from "@orillusion/serialization/SerializationTypes";
 import { SerializationUtil } from "@orillusion/serialization/SerializationUtil";
+import { UnSerializationUtil } from "@orillusion/serialization/unSerialize/UnSerializationUtil";
 
 export class SComponentBase implements SerializeAble {
     /**
@@ -30,7 +31,7 @@ export class SComponentBase implements SerializeAble {
     /**
      * @internal
      */
-    public unSerialize(target: any, componentData: SerializeComponentBase, data: UnSerializeData) {
-        throw new Error('no unSerialization: ' + this['constructor'].name);
+    public unSerialize(target: any, data: SerializeComponentBase, assets: UnSerializeData) {
+        UnSerializationUtil.serialization2(target, data, assets);
     }
 }

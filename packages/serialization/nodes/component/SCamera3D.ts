@@ -1,7 +1,7 @@
 import { ISerializeAssetsCollect } from "@orillusion/serialization/ISerializeAssetsCollect";
 import { SerializeComponentBase, SerializeCamera3D } from "@orillusion/serialization/SerializeData";
 import { UnSerializeData } from "@orillusion/serialization/unSerialize/UnSerializeData";
-import { Camera3D } from "@orillusion/core";
+import { Camera3D, CameraType } from "@orillusion/core";
 import { SComponentBase } from "./SComponentBase";
 
 export class SCamera3D extends SComponentBase {
@@ -28,5 +28,10 @@ export class SCamera3D extends SComponentBase {
         camera3D.far = cData.far;
         camera3D.near = cData.near;
         camera3D.isShadowCamera = cData.isShadowCamera;
+        if (camera3D.type == CameraType.perspective) {
+            camera3D.perspective(camera3D.fov, camera3D.aspect, camera3D.near, camera3D.far);
+        }
+        data.cameras.push(camera3D);
+        return camera3D;
     }
 }

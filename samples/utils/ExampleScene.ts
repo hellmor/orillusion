@@ -81,7 +81,7 @@ export function createSceneParam(): ExampleSceneParam {
 }
 
 /******** direction light *******/
-function createDirectLight(param: ExampleSceneParam): DirectLight {
+export function createDirectLight(param: ExampleSceneParam): DirectLight {
     let lightObj3D = new Object3D();
     lightObj3D.x = param.light.position.x;
     lightObj3D.y = param.light.position.y;

@@ -48,7 +48,7 @@ export class SerializeAssetsCollect implements ISerializeAssetsCollect {
                         this.refMaterials.set(material, null);
                     }
                 } else {
-                    console.log(v);
+                    // console.log(v);
                 }
             }
             // }

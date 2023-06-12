@@ -1,5 +1,5 @@
 ﻿import { Object3D } from "@orillusion/core";
-import { IsNonSerialize, NonSerialize } from "../../src/util/ClassDecoration";
+import { IsNonSerialize, NonSerialize } from "../../src/util/SerializeDecoration";
 
 class ComponentBase {
     @NonSerialize public name: string = 'dfdf';

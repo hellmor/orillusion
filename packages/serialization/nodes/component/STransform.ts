@@ -21,9 +21,7 @@ export class STransform extends SerializeComponentBase {
         return data;
     }
 
-    public unSerialize(target: any, componentData: SerializeComponentBase, data: UnSerializeData) {
-        let transform = target as Transform;
-
+    public unSerialize(transform: Transform, componentData: SerializeComponentBase, data: UnSerializeData) {
         transform.enable = componentData.enable;
 
         let cData: SerializeTransform = componentData as SerializeTransform;
@@ -36,5 +34,6 @@ export class STransform extends SerializeComponentBase {
         transform.localPosition = position;
         transform.localScale = scale;
         transform.localRotation = euler;
+        return transform;
     }
 }

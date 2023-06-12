@@ -3,11 +3,12 @@ import { ISerializeAssetsCollect } from "./ISerializeAssetsCollect";
 import { SerializeTextureInstance, SerializeMaterialInstance, SerializeGeometryInstance } from "./SerializeAssetInstance";
 import { SerializeProtoData } from "./SerializeProtoData";
 import { ISerialization } from "./nodes/ISerialization";
+import { UnSerializeData } from "./unSerialize/UnSerializeData";
 export class SerializeAble implements ISerialization {
     serialize(source: any, assets: ISerializeAssetsCollect): SerializeIndex {
         throw new Error("Method not implemented.");
     }
-    unSerialize(target: any, serializeData: any, root: any) {
+    unSerialize(target: any, data: any, asset: UnSerializeData): any {
         throw new Error("Method not implemented.");
     }
 
@@ -55,8 +56,6 @@ export class SerializeLightData {
     public innerAngle: number;
     public outerAngle: number;
     public range: number;
-    public castGI: boolean;
-    public castShadow: boolean;
     public lightTangent: Vector3;
     public iesPofiles: number;
 
@@ -66,6 +65,8 @@ export class SerializeLightComponent extends SerializeComponentBase {
     public size: number;
     public dirFix: number;
     public lightData: SerializeLightData;
+    public castGI: boolean;
+    public castShadow: boolean;
 }
 
 export class SerializeCamera3D extends SerializeComponentBase {
@@ -74,7 +75,6 @@ export class SerializeCamera3D extends SerializeComponentBase {
     public far: number;
     public isShadowCamera: boolean;
     public cameraType: number;
-    public isMainCamera?: boolean;
 }
 
 export class SerializeObject3D extends SerializeIndex {
@@ -82,7 +82,16 @@ export class SerializeObject3D extends SerializeIndex {
     public prefabRef?: string;
     public components: SerializeComponentBase[];
     public isScene3D?: boolean;
+    public envMap: number;
     public children?: number[];
+}
+
+export class SerializeView3D extends SerializeIndex {
+    public x: number;
+    public y: number;
+    public width: number;
+    public height: number;
+    public enable: boolean;
 }
 
 export class SerializeScene3D extends SerializeObject3D {
@@ -103,6 +112,7 @@ export class SerializeData {
     public geometries: SerializeGeometryInstance[];
 
     public engineSetting?: any;
+    public view3DList?: SerializeView3D[];
     public gltfList: string[];
     public prefabList: string[];
 

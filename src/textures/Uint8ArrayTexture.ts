@@ -51,9 +51,10 @@ export class Uint8ArrayTexture extends Texture {
 
         GPUContext.endCommandEncoder(commandEncoder);
 
-        if (useMipmap) {
-            TextureMipmapGenerator.webGPUGenerateMipmap(this);
-        }
+        // if (useMipmap) {
+        //     TextureMipmapGenerator.webGPUGenerateMipmap(this);
+        // }
+        this.useMipmap = useMipmap;
         return this;
     }
 

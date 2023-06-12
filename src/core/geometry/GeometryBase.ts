@@ -9,7 +9,7 @@ import { GeometryVertexType } from "./GeometryVertexType";
 import { VertexAttributeData } from "./VertexAttributeData";
 import { ArrayBufferData } from "../../gfx/graphics/webGpu/core/buffer/ArrayBufferData";
 import { GeometryAsset } from "./GeometryAsset";
-import { NonSerialize } from "../../util/ClassDecoration";
+import { NonSerialize } from "../../util/SerializeDecoration";
 
 export type LodLevel = {
     indexStart: number;
