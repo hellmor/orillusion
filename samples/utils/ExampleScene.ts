@@ -51,7 +51,7 @@ export function createSceneParam(): ExampleSceneParam {
             far: 5000,
             distance: 100,
             fov: 60,
-            pitch: -30,
+            pitch: -15,
             roll: -30,
         },
 
@@ -67,9 +67,9 @@ export function createSceneParam(): ExampleSceneParam {
                 z: -40,
             },
             euler: {
-                x: 0,
-                y: 200,
-                z: 135,
+                x: 20,
+                y: 160,
+                z: 0,
             },
 
             kelvin: 5355,

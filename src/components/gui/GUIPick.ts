@@ -17,7 +17,7 @@ import { zSorterUtil } from '../../util/ZSorterUtil';
 
 /**
  * Pickup logic for GUI interactive components
- * @group GUI/IO
+ * @group GPU GUI
  */
 export class GUIPick {
     // The ray used for bounding box pickup
@@ -165,7 +165,7 @@ export class GUIPick {
 
         let intersect: { intersect: boolean; intersectPoint?: Vector3; distance: number; interactive?: IUIInteractive };
         for (const iterator of colliders) {
-            if (iterator.interactive && iterator.enable) {
+            if (iterator.interactive && iterator.enable && iterator.interactiveVisible) {
                 intersect = iterator.rayPick(this._ray, screenPos, screenSize);
                 if (intersect) {
                     intersect.interactive = iterator;

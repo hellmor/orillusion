@@ -1,10 +1,17 @@
-import { MaterialBase, ShaderLib, Vector2, BlendMode, GPUCompareFunction, GPUCullMode, Texture, Engine3D, registerMaterial } from "../../..";
+import { Engine3D } from "../../../Engine3D";
+import { ShaderLib } from "../../../assets/shader/ShaderLib";
+import { GPUCompareFunction, GPUCullMode } from "../../../gfx/graphics/webGpu/WebGPUConst";
+import { Texture } from "../../../gfx/graphics/webGpu/core/texture/Texture";
+import { BlendMode } from "../../../materials/BlendMode";
+import { MaterialBase } from "../../../materials/MaterialBase";
+import { registerMaterial } from "../../../materials/MaterialRegister";
+import { Vector2 } from "../../../math/Vector2";
 import { GUISpace } from "../GUIConfig";
 import { GUIShader } from "./GUIShader";
 
 /** 
  * material used in rendering GUI
- * @group GUI
+ * @group GPU GUI
  */
 export class GUIMaterial extends MaterialBase {
     constructor(space: GUISpace) {
@@ -19,6 +26,7 @@ export class GUIMaterial extends MaterialBase {
 
         shader.setUniformVector2('screen', new Vector2(1024, 1024));
         shader.setUniformVector2('mipmapRange', new Vector2(0, 10));
+        shader.setUniformFloat('limitVertex', 0);//count: (quadCount + 1) * QuadStruct.vertexCount
 
         let shaderState = shader.shaderState;
         // shaderState.useZ = false;
@@ -31,14 +39,22 @@ export class GUIMaterial extends MaterialBase {
         this.receiveEnv = false;
     }
 
+    /**
+    * Write effective vertex count (vertex index < vertexCount)
+    */
+    public setLimitVertex(vertexCount: number) {
+        this.renderShader.setUniformFloat('limitVertex', vertexCount);
+    }
+
     private _screenSizeVec2: Vector2 = new Vector2();
 
     /**
      * Write screen size to the shader
      */
-    public setScreenSize(width: number, height: number) {
+    public setScreenSize(width: number, height: number): this {
         this._screenSizeVec2.set(width, height);
         this.renderShader.setUniformVector2('screen', this._screenSizeVec2);
+        return this;
     }
 
     /**

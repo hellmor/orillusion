@@ -5,7 +5,11 @@ import { Ray } from '../../../math/Ray';
 import { GUIPickHelper } from '../GUIPickHelper';
 import { Object3D } from '../../../core/entities/Object3D';
 import { Vector3 } from '../../../math/Vector3';
-// basic class of interactive GUI component
+
+/**
+ * The basic class of interactive GUI component
+ * @group GPU GUI
+ */
 export class UIInteractive extends UIComponentBase implements IUIInteractive {
     protected _style: UIInteractiveStyle = UIInteractiveStyle.NORMAL;
     protected _interactive: boolean = false;
@@ -20,6 +24,10 @@ export class UIInteractive extends UIComponentBase implements IUIInteractive {
 
     public set mouseStyle(value: UIInteractiveStyle) {
         this._style = value;
+    }
+
+    public get interactiveVisible(): boolean {
+        return this._uiTransform.globalVisible && this._visible;
     }
 
     init(param?: any) {
@@ -37,10 +45,16 @@ export class UIInteractive extends UIComponentBase implements IUIInteractive {
         return GUIPickHelper.rayPick(ray, screenPos, screenSize, mesh.space, this._uiTransform, mesh.transform.worldMatrix)
     }
 
-    cloneTo(obj: Object3D) {
+    public cloneTo(obj: Object3D) {
         let component = obj.getOrAddComponent(UIInteractive);
-        component.enable = this.enable;
-        component.interactive = this.interactive;
-        component.mouseStyle = this._style;
+        component.copyComponent(this);
+    }
+
+    public copyComponent(from: this): this {
+        super.copyComponent(from);
+        this.enable = from._enable;
+        this.interactive = from._interactive;
+        this.mouseStyle = from._style;
+        return this;
     }
 }

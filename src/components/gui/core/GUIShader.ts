@@ -2,6 +2,10 @@
 import { WorldMatrixUniform } from "../../../assets/shader/core/common/WorldMatrixUniform";
 import { ColorPassFragmentOutput } from "../../../assets/shader/core/struct/ColorPassFragmentOutput";
 
+/**
+ * shader code
+ * @group GPU GUI
+ */
 export class GUIShader {
     private static bindTextureArray() {
         let value = ``;
@@ -107,18 +111,18 @@ export class GUIShader {
         ${WorldMatrixUniform}
         ${GlobalUniform}
 
-        struct VertexUniformBuffer {
-            vColor4: vec4<f32>,
+        struct VertexSpriteBuffer {
             vUvRec: vec4<f32>,
             vUvBorder: vec4<f32>,
             vUvSlice: vec2<f32>,
             vTextureID: f32,
-            slot: f32
+            vVisible: f32
         }
                 
         struct MaterialUniform{
             screen:vec2<f32>,
             mipmapRange:vec2<f32>,
+            limitVertex:f32,
         }
         
         struct VertexOutput {
@@ -143,8 +147,10 @@ export class GUIShader {
         @group(3) @binding(1)
         var<storage, read> vPositionBuffer: array<vec2<f32>>;
         @group(3) @binding(2)
-        var<storage, read> vUniformBuffer: array<VertexUniformBuffer>;
-        
+        var<storage, read> vSpriteBuffer: array<VertexSpriteBuffer>;
+        @group(3) @binding(3)
+        var<storage, read> vColorBuffer: array<vec4<f32>>;
+
         var<private> vertexOut: VertexOutput ;
     `;
 
@@ -158,19 +164,23 @@ export class GUIShader {
             
             let vertexIndex = vertex.vIndex;
             let quadIndex = u32(vertex.vIndex * 0.25);
-            var vUniformData = vUniformBuffer[quadIndex];
+            var vSpriteData = vSpriteBuffer[quadIndex];
             
-            var op = 2.0 * vec2<f32>(vPositionBuffer[u32(vertexIndex)]) / materialUniform.screen;
-            
+            var op = vec2<f32>(0.0001);
+            if(vSpriteData.vVisible > 0.5 && vertexIndex < materialUniform.limitVertex){
+                op = 2.0 * vPositionBuffer[u32(vertexIndex)] / materialUniform.screen;
+            }
+
             vertexOut.member = vec4<f32>(op.x, op.y, vertexIndex * 0.0001, 1.0);
+
             vertexOut.vUV = vec2<f32>(vertex.uv);
+            vertexOut.vUvRec = vSpriteData.vUvRec;
+            vertexOut.vUvBorder = vSpriteData.vUvBorder;
+            vertexOut.vUvSlice = vSpriteData.vUvSlice;
+            vertexOut.vTextureID = vSpriteData.vTextureID;
             
-            vertexOut.vUvRec = vUniformData.vUvRec;
-            vertexOut.vColor4 = vUniformData.vColor4;
-            vertexOut.vUvBorder = vUniformData.vUvBorder;
-            vertexOut.vUvSlice = vUniformData.vUvSlice;
-            vertexOut.vTextureID = vUniformData.vTextureID;
-            
+            vertexOut.vColor4 = vColorBuffer[quadIndex];
+
             return vertexOut;
          }
          
@@ -185,21 +195,23 @@ export class GUIShader {
             
             let vertexIndex = vertex.vIndex;
             let quadIndex = u32(vertex.vIndex * 0.25);
-            var vUniformData = vUniformBuffer[quadIndex];
-            
+            var vSpriteData = vSpriteBuffer[quadIndex];
+
             var localPos = vec4<f32>(vPositionBuffer[u32(vertexIndex)], vertexIndex * 0.0001, 1.0) ;
-            
-            var op = globalUniform.projMat * globalUniform.viewMat * modelMatrix * localPos ;
-            
+            var op = vec4<f32>(0.0001);
+            if(vSpriteData.vVisible > 0.5 && vertexIndex < materialUniform.limitVertex){
+                op = globalUniform.projMat * globalUniform.viewMat * modelMatrix * localPos ;
+            }
             vertexOut.member = op;
             vertexOut.vUV = vec2<f32>(vertex.uv);
             
-            vertexOut.vUvRec = vUniformData.vUvRec;
-            vertexOut.vColor4 = vUniformData.vColor4;
-            vertexOut.vUvBorder = vUniformData.vUvBorder;
-            vertexOut.vUvSlice = vUniformData.vUvSlice;
-            vertexOut.vTextureID = vUniformData.vTextureID;
+            vertexOut.vUvRec = vSpriteData.vUvRec;
+            vertexOut.vUvBorder = vSpriteData.vUvBorder;
+            vertexOut.vUvSlice = vSpriteData.vUvSlice;
+            vertexOut.vTextureID = vSpriteData.vTextureID;
             
+            vertexOut.vColor4 = vColorBuffer[quadIndex];
+
             return vertexOut;
          }
          

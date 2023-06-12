@@ -1,17 +1,19 @@
 import { Object3D } from '../../../core/entities/Object3D';
 import { Color } from '../../../math/Color';
-import { GUIQuad } from '../core/GUIQuad';
+import { UIRenderAble } from './UIRenderAble';
 import { TextAnchor, TextFieldLayout, TextFieldLine } from './TextFieldLayout';
-import { UIComponentBase } from './UIComponentBase';
 
-export class UITextField extends UIComponentBase {
+/**
+ * The textField component for gui
+ * @group GPU GUI
+ */
+export class UITextField extends UIRenderAble {
     private _font: string = '微软雅黑';
     private _fontSize: number = 14;
     private _originSize: number = 42;
     private _alignment: TextAnchor = 0;
     private _lineSpacing: number = 1;
     private _text: string = '';
-    private _textQuads: GUIQuad[] = [];
     private readonly _color: Color = new Color(1, 1, 1, 1);
 
     constructor() {
@@ -20,13 +22,19 @@ export class UITextField extends UIComponentBase {
 
     cloneTo(obj: Object3D) {
         let component = obj.getOrAddComponent(UITextField);
-        component._font = this._font;
-        component._fontSize = this._fontSize;
-        component._originSize = this._originSize;
-        component._alignment = this._alignment;
-        component._lineSpacing = this._lineSpacing;
-        component._color.copyFrom(this._color);
-        component.text = this.text;
+        component.copyComponent(this);
+    }
+
+    public copyComponent(from: this): this {
+        super.copyComponent(from);
+        this._font = from._font;
+        this._fontSize = from._fontSize;
+        this._originSize = from._originSize;
+        this._alignment = from._alignment;
+        this._lineSpacing = from._lineSpacing;
+        this._color.copyFrom(from._color);
+        this.text = this.text;
+        return this;
     }
 
     public get originSize(): number {
@@ -48,7 +56,7 @@ export class UITextField extends UIComponentBase {
     public set fontSize(value: number) {
         if (this._fontSize != value) {
             this._fontSize = value;
-            this.reLayout();
+            this.layoutText();
         }
     }
 
@@ -60,43 +68,50 @@ export class UITextField extends UIComponentBase {
         if (this._text != value) {
             if (!value) value = '';
             this._text = value;
-            this.reLayout();
+            this.layoutText();
         }
-    }
-
-    public clean(): this {
-        while (this._textQuads.length > 0) {
-            let quad = this._textQuads.shift();
-            quad.sprite = null;
-            GUIQuad.quadPool.pushBack(quad);
-        }
-        return this;
     }
 
     private textLine: TextFieldLine[] = null;
     private layoutProxy: TextFieldLayout = new TextFieldLayout();
 
-    private reLayout() {
-        this.clean();
+    private layoutText() {
+        this.detachQuads();
         this.textLine = this.layoutProxy.layout(this);
         for (let i: number = 0, count = this.textLine.length; i < count; i++) {
             let line = this.textLine[i];
             for (let j: number = 0, count = line.quadList.length; j < count; j++) {
                 let quad = line.quadList[j];
                 if (quad) {
-                    this.addQuad(quad);
-                    this._textQuads.push(quad);
+                    this.attachQuad(quad);
                 }
             }
         }
         //refresh color;
         this.color = this._color;
-        this.uiTransform.markNeedsUpdateGUIMesh();
+        this._uiTransform.setNeedUpdateUIPanel();
+        this.onUIComponentVisible(this._visible);
+        this.setShadowDirty();
+    }
+
+    protected onUIComponentVisible(visible: boolean): void {
+        this.applyComponentVisible();
+    }
+
+    protected onUITransformVisible(visible: boolean): void {
+        this.applyComponentVisible();
+    }
+
+    private applyComponentVisible(): void {
+        let isHidden = !this._visible || !this._uiTransform.globalVisible;
+        for (let quad of this._mainQuads) {
+            quad && (quad.visible = !isHidden);
+        }
+        this.setShadowDirty();
     }
 
     protected onTransformResize() {
-        super.onTransformResize();
-        this.reLayout();
+        this.layoutText();
     }
 
     public get color(): Color {
@@ -105,10 +120,10 @@ export class UITextField extends UIComponentBase {
 
     public set color(value: Color) {
         this._color.copyFrom(value);
-        for (let quad of this._textQuads) {
-            quad.color.copyFrom(value);
-            quad.onChange = true;
+        for (let quad of this._mainQuads) {
+            quad.color = value;
         }
+        this.setShadowDirty();
     }
 
     public get alignment(): TextAnchor {
@@ -118,7 +133,7 @@ export class UITextField extends UIComponentBase {
     public set alignment(value: TextAnchor) {
         if (this._alignment != value) {
             this._alignment = value;
-            this.reLayout();
+            this.layoutText();
         }
     }
 
@@ -129,7 +144,7 @@ export class UITextField extends UIComponentBase {
     public set lineSpacing(value: number) {
         if (this._lineSpacing != value) {
             this._lineSpacing = value;
-            this.reLayout();
+            this.layoutText();
         }
     }
 }

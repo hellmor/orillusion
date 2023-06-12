@@ -1,9 +1,7 @@
 import { Object3D } from "../../../core/entities/Object3D";
-import { CEvent } from "../../../event/CEvent";
 import { Matrix3 } from "../../../math/Matrix3";
 import { ComponentBase } from "../../ComponentBase";
 import { GUIMesh } from "../core/GUIMesh";
-import { GUIQuad } from "../core/GUIQuad";
 import { IUIInteractive } from "./IUIInteractive";
 import { UIPanel } from "./UIPanel";
 import { ViewPanel } from "./ViewPanel";
@@ -11,24 +9,36 @@ import { WorldPanel } from "./WorldPanel";
 
 let help_matrix3: Matrix3;
 
+/**
+ * The component for gui, holding information such as size, scaling, position, etc
+ * @group GPU GUI
+ */
 export class UITransform extends ComponentBase {
     public useParentPivot: boolean = false;
     public parent: UITransform;
     public pivotX: number = 0.5;
     public pivotY: number = 0.5;
 
-    private _width: number = 1;
-    private _height: number = 1;
+    private _width: number = 100;
+    private _height: number = 100;
+    private _localVisible: boolean = true;
+    private _globalVisible: boolean = true;
     public guiMesh: GUIMesh;
-
-    public static readonly Resize: string = 'GUITransformResize';
-
-    private _resizeEvent = new CEvent(UITransform.Resize);
-
     protected _uiInteractiveList: IUIInteractive[];
 
     public get uiInteractiveList() {
         return this._uiInteractiveList;
+    }
+
+    constructor() {
+        super();
+        this._localMatrix = new Matrix3();
+        this._worldMatrix = new Matrix3();
+    }
+
+    public init(param?: any): void {
+        super.init(param);
+        this.onParentChange(null, this.object3D.parent?.object3D);
     }
 
     public addUIInteractive(item: IUIInteractive): this {
@@ -48,8 +58,48 @@ export class UITransform extends ComponentBase {
         return null;
     }
 
-    public onParentChange(parent: Object3D) {
-        this.parent = parent ? parent.getComponent(UITransform) : null;
+    public get globalVisible(): boolean {
+        return this._globalVisible;
+    }
+
+    public set visible(value: boolean) {
+        if (this._localVisible != value) {
+            this._localVisible = value;
+            let parentGlobal = this.parent ? this.parent._globalVisible : true;
+            this.onUITransformVisible(this._localVisible && parentGlobal);
+        }
+    }
+
+    public get visible(): boolean {
+        return this._localVisible;
+    }
+
+    protected onUITransformVisible(global: boolean): void {
+        let newGlobalVisible = this._localVisible && global;
+        if (newGlobalVisible != this._globalVisible) {
+            this._globalVisible = newGlobalVisible;
+            this.object3D.components.forEach((v, k) => {
+                let ui = v as UITransform;//it could be UIComponentBase 
+                if (!ui.onUITransformVisible)
+                    return;
+                if (ui == this) {
+                    for (let child of this.object3D.entityChildren) {
+                        let transform = (child as Object3D).getComponent(UITransform);
+                        if (transform) {
+                            transform.onUITransformVisible(this._globalVisible);
+                        }
+                    }
+                } else {
+                    ui.onUITransformVisible(this._globalVisible);
+                }
+            });
+        }
+    }
+
+    public onParentChange(lastParent?: Object3D, currentParent?: Object3D) {
+        this.parent?.setNeedUpdateUIPanel();
+        this.parent = currentParent?.getComponent(UITransform);
+        this.parent?.setNeedUpdateUIPanel();
     }
 
     public get width() {
@@ -65,7 +115,9 @@ export class UITransform extends ComponentBase {
             this._width = width;
             this._height = height;
             this.onChange = true;
-            this.eventDispatcher.dispatchEvent(this._resizeEvent);
+            for (let component of this.object3D.components.values()) {
+                component['onTransformResize']?.();
+            }
             return true;
         }
         return false;
@@ -91,6 +143,13 @@ export class UITransform extends ComponentBase {
             this.object3D.y = value;
             this.onChange = true;
         }
+    }
+
+    public setXY(x: number, y: number) {
+        let pos = this.object3D.localPosition;
+        pos.set(x, y, pos.z);
+        this.object3D.localPosition = pos;
+        this.onChange = true;
     }
 
     public get z() {
@@ -122,7 +181,14 @@ export class UITransform extends ComponentBase {
         this.object3D.scaleY = value;
     }
 
-    public quads: GUIQuad[] = [];
+    public get scaleZ(): number {
+        return this.object3D.scaleZ;
+    }
+
+    public set scaleZ(value: number) {
+        this.onChange = true;
+        this.object3D.scaleZ = value;
+    }
 
     private _localMatrix: Matrix3;
     private _worldMatrix: Matrix3;
@@ -138,6 +204,7 @@ export class UITransform extends ComponentBase {
 
     public set onChange(value: boolean) {
         if (this._onChange != value) {
+            this._onChange = value;
             if (value) {
                 this._tempTransforms.length = 0;
                 //notice: The component list contains corresponding components that belong to the current Object 3D
@@ -151,16 +218,16 @@ export class UITransform extends ComponentBase {
     }
 
     onEnable(): void {
-        this.markNeedsUpdateGUIMesh();
+        this.setNeedUpdateUIPanel();
         this.onChange = true;
     }
 
     onDisable(): void {
-        this.markNeedsUpdateGUIMesh();
+        this.setNeedUpdateUIPanel();
         this.onChange = true;
     }
 
-    public markNeedsUpdateGUIMesh(): void {
+    public setNeedUpdateUIPanel(): void {
         let panel: UIPanel;
         panel = this.object3D.getComponentFromParent(WorldPanel);
         if (!panel) {
@@ -171,15 +238,9 @@ export class UITransform extends ComponentBase {
         }
     }
 
-    constructor() {
-        super();
-        this._localMatrix = new Matrix3();
-        this._worldMatrix = new Matrix3();
-    }
-
     public cloneTo(obj: Object3D) {
         let component = obj.getOrAddComponent(UITransform);
-
+        component.visible = this.visible;
         component.x = this.x;
         component.y = this.y;
         component.z = this.z;
@@ -196,7 +257,12 @@ export class UITransform extends ComponentBase {
     public matrix(): Matrix3 {
         let mtx = this._localMatrix;
         let rot = this.object3D.rotationZ;
-        mtx.updateScaleAndRotation(this.object3D.scaleX, this.object3D.scaleY, rot, rot);
+        if (this.parent) {
+            mtx.updateScaleAndRotation(this.object3D.scaleX, this.object3D.scaleY, rot, rot);
+        } else {
+            //it's ui panel root
+            mtx.updateScaleAndRotation(1, 1, rot, rot);
+        }
         mtx.tx = this.object3D.x;
         mtx.ty = this.object3D.y;
 

@@ -1,21 +1,42 @@
+import { GPUCompareFunction, View3D } from "../../..";
 import { Object3D } from "../../../core/entities/Object3D";
 import { GUISpace } from "../GUIConfig";
 import { UIPanel } from "./UIPanel";
 
-// UI component container for world space
+/**
+ * UI component container for world space
+ * @group GPU GUI
+ */
 export class WorldPanel extends UIPanel {
-  public depthTest: boolean = false;
+  public readonly isWorldPanel = true;
+  public readonly space: GUISpace = GUISpace.World;
+  private _depthTest: boolean = true;
 
   constructor() {
     super();
-    this.space = GUISpace.World;
   }
 
   public cloneTo(obj: Object3D) {
     let component: WorldPanel = obj.getOrAddComponent(WorldPanel);
-    component.order = this.order;
-    component.depthTest = this.depthTest;
-    component.panelOrder = this.panelOrder;
-    component.needSortOnCameraZ = this.needSortOnCameraZ;
+    component.copyComponent(this);
   }
+
+  public copyComponent(from: this): this {
+    super.copyComponent(from);
+    this.depthTest = from.depthTest;
+    return this;
+  }
+
+  public get depthTest() {
+    return this._depthTest;
+  }
+
+  public set depthTest(value: boolean) {
+    if (this._depthTest != value) {
+      this._depthTest = value;
+      let compare = this.depthTest ? GPUCompareFunction.less_equal : GPUCompareFunction.always;
+      this.guiMesh.uiRenderer.material.depthCompare = compare;
+    }
+  }
+
 }

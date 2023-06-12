@@ -27,7 +27,7 @@ import { GPUBufferType } from "../core/buffer/GPUBufferType";
 
 import { MaterialDataUniformGPUBuffer } from "../core/buffer/MaterialDataUniformGPUBuffer";
 import { ShaderUtil } from "./util/ShaderUtil";
-import { Reference } from "../../../..";
+import { Reference } from "../../../../util/Reference";
 
 export class RenderShader extends ShaderBase {
     public useRz: boolean = false;
@@ -371,11 +371,11 @@ export class RenderShader extends ShaderBase {
             this.defineValue[`USE_WORLDPOS`] = false;
             this.defineValue[`USEGBUFFER`] = false;
         }
-        // if (Engine3D.setting.gi.enable) {
-        //     this.defineValue[`USEGI`] = true;
-        // } else {
-        //     this.defineValue[`USEGI`] = false;
-        // }
+        if (Engine3D.setting.gi.enable) {
+            this.defineValue[`USEGI`] = true;
+        } else {
+            this.defineValue[`USEGI`] = false;
+        }
         if (Engine3D.setting.material.materialChannelDebug) {
             this.defineValue[`USE_DEBUG`] = true;
         }
@@ -436,12 +436,10 @@ export class RenderShader extends ShaderBase {
                 Reference.getInstance().detached(texture, this);
                 if (force && !Reference.getInstance().hasReference(texture)) {
                     texture.destroy(force);
-                    console.log("destroy");
+                    // console.log("destroy");
                 } else {
                     texture.destroy(false);
-                    console.log("has use , cant destroy",
-                        Reference.getInstance().getReferenceCount(texture),
-                    );
+                    // console.log("has use , cant destroy", Reference.getInstance().getReferenceCount(texture));
                     let table = Reference.getInstance().getReference(texture);
                     let list = [];
                     table.forEach((v, k) => {
@@ -451,7 +449,7 @@ export class RenderShader extends ShaderBase {
                             list.push(`NaN`);
                         }
                     });
-                    console.log("ref", list);
+                    // console.log("ref", list);
                 }
             }
         }
@@ -627,7 +625,7 @@ export class RenderShader extends ShaderBase {
                             // if(info.binding == 8){
                             //     console.log(info.binding, entry );
                             // }
-                            Reference.getInstance().attache(texture, this);
+                            Reference.getInstance().attached(texture, this);
                         }
                         break;
                     case `texture_external`:
@@ -641,7 +639,7 @@ export class RenderShader extends ShaderBase {
                             entries.push(entry);
                             this._textureGroup = index;
                             // console.log(info.binding, entry );
-                            Reference.getInstance().attache(texture, this);
+                            Reference.getInstance().attached(texture, this);
                         }
                         break;
                     default:
@@ -655,7 +653,7 @@ export class RenderShader extends ShaderBase {
                             entries.push(entry);
                             this._textureGroup = index;
                             // console.log(info.binding, entry );
-                            Reference.getInstance().attache(texture, this);
+                            Reference.getInstance().attached(texture, this);
                         }
                         break;
                 }
@@ -790,7 +788,11 @@ export class RenderShader extends ShaderBase {
         let targets = renderPassState.outAttachments;
         if (renderPassState.outColor != -1) {
             let target = targets[renderPassState.outColor];
-            target.blend = BlendFactor.getBlend(shaderState.blendMode);
+            if (shaderState.blendMode != BlendMode.NONE) {
+                target.blend = BlendFactor.getBlend(shaderState.blendMode);
+            } else {
+                target.blend = undefined;
+            }
         }
 
         let renderPipelineDescriptor: GPURenderPipelineDescriptor = {

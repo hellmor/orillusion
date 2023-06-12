@@ -1,5 +1,5 @@
 import { GUIHelp } from "@orillusion/debug/GUIHelp";
-import { AtmosphericComponent, DirectLight, PointLight, SpotLight, Transform } from "@orillusion/core";
+import { AtmosphericComponent, BillboardType, Color, DirectLight, Engine3D, GPUCullMode, GlobalIlluminationComponent, PointLight, SpotLight, Transform, UIImage, UIPanel, UIShadow, View3D } from "@orillusion/core";
 import { UVMoveComponent } from "@samples/material/script/UVMoveComponent";
 
 export class GUIUtil {
@@ -49,6 +49,7 @@ export class GUIUtil {
         GUIHelp.addColor(light, 'lightColor');
         GUIHelp.add(light, 'intensity', 0.0, 160.0, 0.01);
         GUIHelp.add(light, 'indirect', 0.0, 10.0, 0.01);
+        GUIHelp.add(light, 'castShadow');
 
         open && GUIHelp.open();
         GUIHelp.endFolder();
@@ -71,6 +72,7 @@ export class GUIUtil {
         GUIHelp.add(light, 'radius', 0.0, 1000.0, 0.001);
         GUIHelp.add(light, 'range', 0.0, 1000.0, 0.001);
         GUIHelp.add(light, 'quadratic', 0.0, 2.0, 0.001);
+        GUIHelp.add(light, 'castShadow');
 
         GUIHelp.open();
         GUIHelp.endFolder();
@@ -94,8 +96,103 @@ export class GUIUtil {
         GUIHelp.add(light, 'range', 0.0, 1000.0, 0.001);
         GUIHelp.add(light, 'outerAngle', 0.0, 180.0, 0.001);
         GUIHelp.add(light, 'innerAngle', 0.0, 100.0, 0.001);
+        GUIHelp.add(light, 'castShadow');
 
         GUIHelp.open();
+        GUIHelp.endFolder();
+    }
+
+    public static renderGIComponent(component: GlobalIlluminationComponent): void {
+        let volume = component['_volume'];
+        let giSetting = volume.setting;
+        let view: View3D = Engine3D.views[0];
+        let renderJob = Engine3D.getRenderJob(view);
+
+        function onProbesChange(): void {
+            component['changeProbesPosition']();
+        }
+
+        function debugProbeRay(probeIndex: number, array: Float32Array): void {
+            component['debugProbeRay'](probeIndex, array);
+        }
+
+        GUIHelp.addFolder('GI');
+        GUIHelp.add(giSetting, `lerpHysteresis`, 0.001, 10, 0.0001).onChange(() => {
+            onProbesChange();
+        });
+        GUIHelp.add(giSetting, `depthSharpness`, 1.0, 100.0, 0.001).onChange(() => {
+            onProbesChange();
+        });
+        GUIHelp.add(giSetting, `normalBias`, -100.0, 100.0, 0.001).onChange(() => {
+            onProbesChange();
+        });
+        GUIHelp.add(giSetting, `irradianceChebyshevBias`, -100.0, 100.0, 0.001).onChange(() => {
+            onProbesChange();
+        });
+        GUIHelp.add(giSetting, `rayNumber`, 0, 512, 1).onChange(() => {
+            onProbesChange();
+        });
+        GUIHelp.add(giSetting, `irradianceDistanceBias`, 0.0, 200.0, 0.001).onChange(() => {
+            onProbesChange();
+        });
+        GUIHelp.add(giSetting, `indirectIntensity`, 0.0, 100.0, 0.001).onChange(() => {
+            onProbesChange();
+        });
+        GUIHelp.add(giSetting, `bounceIntensity`, 0.0, 1.0, 0.001).onChange(() => {
+            onProbesChange();
+        });
+        GUIHelp.add(giSetting, `probeRoughness`, 0.0, 1.0, 0.001).onChange(() => {
+            onProbesChange();
+        });
+        GUIHelp.add(giSetting, `ddgiGamma`, 0.0, 4.0, 0.001).onChange(() => {
+            onProbesChange();
+        });
+
+        GUIHelp.add(giSetting, 'autoRenderProbe');
+        GUIHelp.endFolder();
+
+        GUIHelp.addFolder('probe volume');
+        GUIHelp.add(volume.setting, 'probeSpace', 0.1, volume.setting.probeSpace * 5, 0.001).onChange(() => {
+            onProbesChange();
+        });
+        GUIHelp.add(volume.setting, 'offsetX', -100, 100, 0.001).onChange(() => {
+            onProbesChange();
+        });
+        GUIHelp.add(volume.setting, 'offsetY', -100, 100, 0.001).onChange(() => {
+            onProbesChange();
+        });
+        GUIHelp.add(volume.setting, 'offsetZ', -100, 100, 0.001).onChange(() => {
+            onProbesChange();
+        });
+        GUIHelp.addButton('show', () => {
+            component.object3D.transform.enable = true;
+        });
+        GUIHelp.addButton('hide', () => {
+            component.object3D.transform.enable = false;
+        });
+
+        let ddgiProbeRenderer = renderJob.ddgiProbeRenderer;
+        GUIHelp.addButton('showRays', () => {
+            let array = ddgiProbeRenderer.irradianceComputePass['depthRaysBuffer'].readBuffer();
+            let count = Engine3D.setting.gi.probeXCount * Engine3D.setting.gi.probeYCount * Engine3D.setting.gi.probeZCount
+            for (let j = 0; j < count; j++) {
+                let probeIndex = j;
+                debugProbeRay(probeIndex, array);
+            }
+            debugProbeRay(0, array);
+        });
+
+        GUIHelp.addButton('hideRays', () => {
+            let count = Engine3D.setting.gi.probeXCount * Engine3D.setting.gi.probeYCount * Engine3D.setting.gi.probeZCount
+            for (let j = 0; j < count; j++) {
+                let probeIndex = j;
+                const rayNumber = Engine3D.setting.gi.rayNumber;
+                for (let i = 0; i < rayNumber; i++) {
+                    let id = `showRays${probeIndex}${i}`;
+                    view.graphic3D.Clear(id);
+                }
+            }
+        });
         GUIHelp.endFolder();
     }
 
@@ -113,5 +210,58 @@ export class GUIUtil {
         GUIHelp.endFolder();
     }
 
+    public static renderUIShadow(image: UIShadow, open: boolean = true, name?: string) {
+        name ||= 'Image Shadow';
+        GUIHelp.addFolder(name);
+        GUIHelp.add(image, 'shadowQuality', 0, 4, 1);
+
+        GUIHelp.add(image, 'shadowRadius', 0.00, 10, 0.01);
+        //shadow color
+        image.shadowColor = new Color(0.1, 0.1, 0.1, 0.6);
+        GUIHelp.addColor(image, 'shadowColor');
+
+        let changeOffset = () => {
+            image.shadowOffset = image.shadowOffset;
+        }
+        GUIHelp.add(image.shadowOffset, 'x', -100, 100, 0.01).onChange(v => changeOffset());
+        GUIHelp.add(image.shadowOffset, 'y', -100, 100, 0.01).onChange(v => changeOffset());
+        GUIHelp.addButton('Destroy', () => { image.object3D.removeComponent(UIShadow); })
+        open && GUIHelp.open();
+        GUIHelp.endFolder();
+    }
+
+    public static renderUIPanel(panel: UIPanel, open: boolean = true, name?: string) {
+        name ||= 'GUI Panel';
+        GUIHelp.addFolder(name);
+        //cull mode
+        let cullMode = {};
+        cullMode[GPUCullMode.none] = GPUCullMode.none;
+        cullMode[GPUCullMode.front] = GPUCullMode.front;
+        cullMode[GPUCullMode.back] = GPUCullMode.back;
+
+        // change cull mode by click dropdown box
+        GUIHelp.add({ cullMode: GPUCullMode.none }, 'cullMode', cullMode).onChange((v) => {
+            panel.cullMode = v;
+        });
+
+        //billboard
+        let billboard = {};
+        billboard['None'] = BillboardType.None;
+        billboard['Y'] = BillboardType.BillboardY;
+        billboard['XYZ'] = BillboardType.BillboardXYZ;
+
+        // change billboard by click dropdown box
+        GUIHelp.add({ billboard: panel.billboard }, 'billboard', billboard).onChange((v) => {
+            panel.billboard = v;
+        });
+
+        //depth test
+        if (panel['isWorldPanel']) {
+            GUIHelp.add(panel, 'depthTest');
+        }
+
+        open && GUIHelp.open();
+        GUIHelp.endFolder();
+    }
 
 }
