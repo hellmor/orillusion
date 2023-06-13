@@ -45,6 +45,5 @@ export class SScene3D extends SObject3D {
     unSerialize(target: Scene3D, nodeData: SerializeObject3D, data: UnSerializeData) {
         super.unSerialize(target, nodeData, data);
         target.envMap = data.textureList[nodeData.envMap];
-        data.scene = target;
     }
 }

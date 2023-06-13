@@ -1,4 +1,4 @@
-﻿import { Engine3D, Entity, Scene3D } from '@orillusion/core';
+﻿import { Engine3D, Scene3D } from '@orillusion/core';
 import { GUIHelp } from '@orillusion/debug/GUIHelp';
 import { PrefabLoader } from '@orillusion/serialization/unSerialize/PrefabLoader';
 
@@ -9,7 +9,7 @@ class Sample_UnSerializeScene {
 
         GUIHelp.init();
 
-        GUIHelp.addButton('load prefab', () => {
+        GUIHelp.addButton('Load Prefab', () => {
             this.loadPrefab();
         })
         GUIHelp.open();
@@ -26,17 +26,8 @@ class Sample_UnSerializeScene {
 
         let renderJob = Engine3D.getRenderJob(views[0]);
         loader.applyPostEffects(renderJob);
-        // this.printHierarchy(this.scene);
     }
 
-    private printHierarchy(obj: Entity, path: string = '') {
-        console.log(path, obj.name);
-
-        path += '== ';
-        for (let child of obj.entityChildren) {
-            this.printHierarchy(child, path);
-        }
-    }
 }
 
 new Sample_UnSerializeScene().run();

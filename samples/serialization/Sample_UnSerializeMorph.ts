@@ -9,7 +9,7 @@ class Sample_UnSerializeMorph {
 
         GUIHelp.init();
 
-        GUIHelp.addButton('load prefab', () => {
+        GUIHelp.addButton('Load Prefab(Morph)', () => {
             this.loadPrefab();
         })
         GUIHelp.open();
@@ -33,7 +33,7 @@ class Sample_UnSerializeMorph {
         this.blender = this.scene.getComponentsExt(MorphTargetBlender)[0];
         let targetRenderers = this.blender.cloneMorphRenderers();
 
-        GUIHelp.addFolder('morph controller');
+        GUIHelp.addFolder('Morph Controller');
         for (let key in targetRenderers) {
             this.influenceData[key] = 0.0;
             GUIHelp.add(this.influenceData, key, 0, 1, 0.01).onChange((v) => {

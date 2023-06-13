@@ -7,7 +7,7 @@ export class UnSerializeData {
     geometries: GeometryBase[] = [];
     prefabData: SerializeData;
     object3DList: Object3D[] = [];
+    cameraList: Camera3D[] = [];
+    rootNode?: Scene3D | Object3D;
     view3DList?: View3D[];
-    cameras: Camera3D[] = [];
-    scene?: Scene3D;
 }

@@ -245,7 +245,10 @@ export class Object3D extends Entity {
      */
     public instantiate(): Object3D {
         let tmp = new Object3D();
-        tmp.name = this.name + "_clone";
+        tmp.name = this.name + "(clone)";
+        tmp.serializeTag = this.serializeTag;
+        tmp.prefabRef = this.prefabRef;
+
         this.entityChildren.forEach((v, k) => {
             let tmpChild = v.instantiate();
             tmp.addChild(tmpChild);

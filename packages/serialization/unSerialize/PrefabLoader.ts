@@ -189,14 +189,16 @@ export class PrefabLoader extends ParserBase {
                 node = new Scene3D();
             } else {
                 if (item.prefabRef) {
-                    node = Engine3D.res.getPrefab(item.prefabRef).clone();
+                    node = Engine3D.res.instantiatePrefab(item.prefabRef).clone();
                 } else {
                     node = new Object3D();
                 }
             }
             UnSerializationUtil.unSerialize(node, item, this.assets);
             if (item.index == 0) {
+                node.prefabRef = this.initUrl;
                 this.data = node;
+                this.assets.rootNode = node;
             }
             this.assets.object3DList.push(node);
         }
@@ -322,8 +324,6 @@ export class PrefabLoader extends ParserBase {
             bloomPost.strength = postProcessing.bloom.strength;
             bloomPost.luminosityThreshold = postProcessing.bloom.luminosityThreshold;
             bloomPost.radius = postProcessing.bloom.radius;
-            // bloomPost.bloomRadius = postProcessing.bloom.intensity;
-            //todo bloom param
             renderJob.addPost(bloomPost);
         }
         //outline

@@ -1,4 +1,4 @@
-import { Vector4, View3D } from "@orillusion/core";
+import { Scene3D, Vector4, View3D } from "@orillusion/core";
 import { ISerializeAssetsCollect } from "../ISerializeAssetsCollect";
 import { SerializeAble, SerializeView3D } from "../SerializeData";
 import { UnSerializeData } from "../unSerialize/UnSerializeData";
@@ -25,8 +25,8 @@ export class SView3D extends SerializeAble {
         target.enable = nodeData.enable;
 
         //
-        target.camera = root.cameras[0];
-        target.scene = root.scene;
+        target.camera = root.cameraList[0];
+        target.scene = root.rootNode as Scene3D;
         return target;
     }
 }

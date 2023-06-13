@@ -124,11 +124,11 @@ export class Res {
     }
 
     /**
-     * get prefab by name
+     * instantiate prefab by name
      * @param name prefab name
      * @returns
      */
-    public getPrefab(name: string) {
+    public instantiatePrefab(name: string) {
         return this._prefabPool.get(name).instantiate();
     }
 

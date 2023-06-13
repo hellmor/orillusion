@@ -31,7 +31,7 @@ export class SCamera3D extends SComponentBase {
         if (camera3D.type == CameraType.perspective) {
             camera3D.perspective(camera3D.fov, camera3D.aspect, camera3D.near, camera3D.far);
         }
-        data.cameras.push(camera3D);
+        data.cameraList.push(camera3D);
         return camera3D;
     }
 }
