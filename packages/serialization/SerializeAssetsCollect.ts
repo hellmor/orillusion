@@ -23,12 +23,6 @@ export class SerializeAssetsCollect implements ISerializeAssetsCollect {
         // this.refShaders = new Map<Shader, SerializeShaderInstance>;
         this.refGeometries = new Map<GeometryBase, SerializeGeometryInstance>;
 
-        if (object3D.isScene3D) {
-            // let skyRenderer = object3D['skyRender'] as SkyRenderer;
-            // this.refGeometries.set(skyRenderer.geometry, null);
-            // this.refTextures.set(skyRenderer.map, null);
-        }
-
         this.collectAssetsOfObject3D(object3D);
         this.makeInstanceOfAssets();
         this.removeNullAssetInstance();
@@ -94,11 +88,16 @@ export class SerializeAssetsCollect implements ISerializeAssetsCollect {
         })
 
         texture_list.forEach((v) => {
-            let defaultTexture = Engine3D.res.isDefaultTexture(v.name);
+            let defaultTexture = Engine3D.res.getDefaultTexture(v.name);
+            let instance: SerializeTextureInstance;
             if (defaultTexture) {
                 defaultTexture.asset ||= new TextureAsset().setDefault();
+                instance = new SerializeTextureInstance();
+                instance.asset = defaultTexture.asset;
+                instance.name = defaultTexture.name;
+            } else {
+                instance = SerializationUtil.serialization(v, this);
             }
-            let instance: SerializeTextureInstance = SerializationUtil.serialization(v, this);
             if (instance) {
                 this.refTextures.set(v, instance);
             }

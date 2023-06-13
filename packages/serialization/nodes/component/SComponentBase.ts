@@ -32,6 +32,6 @@ export class SComponentBase implements SerializeAble {
      * @internal
      */
     public unSerialize(target: any, data: SerializeComponentBase, assets: UnSerializeData) {
-        UnSerializationUtil.serialization2(target, data, assets);
+        UnSerializationUtil.unSerialize2(target, data, assets);
     }
 }

@@ -9,5 +9,6 @@ export class Probe extends Object3D {
     public drawCallFrame = -1;
     constructor() {
         super();
+        this.serializeTag = 'non';
     }
 }

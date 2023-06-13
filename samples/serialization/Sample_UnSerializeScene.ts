@@ -2,7 +2,7 @@
 import { GUIHelp } from '@orillusion/debug/GUIHelp';
 import { PrefabLoader } from '@orillusion/serialization/unSerialize/PrefabLoader';
 
-class Sample_UnSerialize {
+class Sample_UnSerializeScene {
     private scene: Scene3D;
     async run() {
         await Engine3D.init();
@@ -39,4 +39,4 @@ class Sample_UnSerialize {
     }
 }
 
-new Sample_UnSerialize().run();
+new Sample_UnSerializeScene().run();

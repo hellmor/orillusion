@@ -398,9 +398,10 @@ export class Res {
 
     private _defaultTexture: Map<string, Texture>;
 
-    public isDefaultTexture(name: string): Texture {
+    public getDefaultTexture(name: string): Texture {
         return this._defaultTexture?.get(name);
     }
+
     /**
      * create a texture
      * @param width width of texture
@@ -423,7 +424,9 @@ export class Res {
         texture.create(16, 16, textureData, true);
         if (name) {
             this.addTexture(name, texture);
-            this._defaultTexture.set(name, texture);
+            if (name.startsWith('default-')) {
+                this._defaultTexture.set(name, texture);
+            }
         }
         return texture;
     }

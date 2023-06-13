@@ -88,7 +88,7 @@ export class PrefabLoader extends ParserBase {
             let textureKey = item.asset;
             switch (item.asset.type) {
                 case 'default':
-                    texture = Engine3D.res.getTexture(item.name);
+                    texture = Engine3D.res.getDefaultTexture(item.name);
                     break;
                 // case 'cube-atmospheric':
                 // internal
@@ -199,11 +199,11 @@ export class PrefabLoader extends ParserBase {
                 this.data = node;
             }
             this.assets.object3DList.push(node);
-
         }
 
+        let hierarchy = this.assets.prefabData.hierarchy;
         //build hierarchy
-        for (let item of this.assets.prefabData.hierarchy) {
+        for (let item of hierarchy) {
             let parent = this.assets.object3DList[item.index];
             if (parent && item.children && item.children.length > 0) {
                 for (let i of item.children) {
@@ -213,7 +213,8 @@ export class PrefabLoader extends ParserBase {
         }
 
         //build component
-        for (let item of this.assets.prefabData.hierarchy) {
+        for (let i = hierarchy.length - 1; i >= 0; i--) {
+            let item = hierarchy[i];
             let node = this.assets.object3DList[item.index];
             for (let component of item.components) {
                 this.parseComponent(node, component);
@@ -245,10 +246,10 @@ export class PrefabLoader extends ParserBase {
     public applyEngineSetting(instance: EngineSetting) {
         let serializeData = this.assets.prefabData.engineSetting as EngineSetting;
         if (serializeData) {
-            UnSerializationUtil.serialization2(instance.shadow, serializeData.shadow, this.assets);
-            UnSerializationUtil.serialization2(instance.gi, serializeData.gi, this.assets);
-            UnSerializationUtil.serialization2(instance.sky, serializeData.sky, this.assets);
-            UnSerializationUtil.serialization2(instance.light, serializeData.light, this.assets);
+            UnSerializationUtil.unSerialize2(instance.shadow, serializeData.shadow, this.assets);
+            UnSerializationUtil.unSerialize2(instance.gi, serializeData.gi, this.assets);
+            UnSerializationUtil.unSerialize2(instance.sky, serializeData.sky, this.assets);
+            UnSerializationUtil.unSerialize2(instance.light, serializeData.light, this.assets);
         }
     }
 

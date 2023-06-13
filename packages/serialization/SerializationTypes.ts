@@ -1,4 +1,4 @@
-import { AtmosphericComponent, AtmosphericScatteringSky, BoxGeometry, Camera3D, ColliderComponent, ComponentBase, CylinderGeometry, Depth2DTextureArray, DirectLight, GeometryBase, HoverCameraController, LDRTextureCube, LightBase, MaterialBase, MeshRenderer, Object3D, PlaneGeometry, PointLight, RenderNode, Scene3D, SkyRenderer, SolidColorSky, SphereGeometry, SpotLight, Texture, TorusGeometry, Transform, Vector2, Vector3, Vector4, View3D, VirtualTexture } from "@orillusion/core";
+import { AtmosphericComponent, Camera3D, ColliderComponent, Color, ComponentBase, DirectLight, GeometryBase, HoverCameraController, LightBase, MaterialBase, MeshRenderer, MorphTargetBlender, Object3D, PointLight, RenderNode, Scene3D, SkyRenderer, SolidColorSky, SpotLight, Texture, Transform, Vector2, Vector3, Vector4, View3D, } from "@orillusion/core";
 import { SObject3D, SScene3D } from "./nodes/SObject3D";
 import { STransform } from "./nodes/component/STransform";
 import { SVector2D } from "./nodes/SVector2D";
@@ -6,7 +6,7 @@ import { SVector3D } from "./nodes/SVector3D";
 import { SerializeAble } from "./SerializeData";
 import { SMaterial } from "./nodes/SMaterial";
 import { SGeometryBase } from "./nodes/SGeometry";
-import { STexture, SLDRTextureCube, SDepth2DTextureArray, SAtmosphericScatteringSky, SVirtualTexture, SSolidColorSky } from "./nodes/STexture";
+import { SSolidColorSky, STexture } from "./nodes/STexture";
 import { SCamera3D } from "./nodes/component/SCamera3D";
 import { SVector4D } from "./nodes/SVector4D";
 import { SComponentBase } from "./nodes/component/SComponentBase";
@@ -14,6 +14,7 @@ import { SRenderNode, SMeshRenderer, SSkyRenderer, SAtmosphericComponent } from 
 import { SDirectLight, SSpotLight, SPointLight, SLightBase } from "./nodes/component/SLightBase";
 import { SColliderComponent } from "./nodes/component/SColliderComponent";
 import { SView3D } from "./nodes/SView3D";
+import { SColor } from "./nodes/SColor";
 
 export class SerializationTypes {
     private static _nameToSerializeClass: Map<string, any>;
@@ -31,8 +32,10 @@ export class SerializationTypes {
 
         //component
         this.register("ComponentBase", ComponentBase, new SComponentBase());
+
         this.register("HoverCameraController", HoverCameraController, new SComponentBase());
 
+        this.register("MorphTargetBlender", MorphTargetBlender, new SComponentBase());
 
         this.register("Transform", Transform, new STransform());
         this.register("Camera3D", Camera3D, new SCamera3D());
@@ -52,6 +55,7 @@ export class SerializationTypes {
         this.register("Vector2D", Vector2, new SVector2D());
         this.register("Vector3D", Vector3, new SVector3D());
         this.register("Vector4D", Vector4, new SVector4D());
+        this.register("Color", Color, new SColor());
 
         //material
         this.register("Material", MaterialBase, new SMaterial());
@@ -61,18 +65,9 @@ export class SerializationTypes {
 
         //geometry
         this.register('GeometryBase', GeometryBase, new SGeometryBase());
-        // this.register('BoxGeometry', BoxGeometry, new SGeometryBase());
-        // this.register('PlaneGeometry', PlaneGeometry, new SGeometryBase());
-        // this.register('TorusGeometry', TorusGeometry, new SGeometryBase());
-        // this.register('SphereGeometry', SphereGeometry, new SGeometryBase());
-        // this.register('CylinderGeometry', CylinderGeometry, new SGeometryBase());
 
         //texture
         this.register('Texture', Texture, new STexture());
-        this.register('LDRTextureCube', LDRTextureCube, new SLDRTextureCube());
-        this.register('Depth2DTextureArray', Depth2DTextureArray, new SDepth2DTextureArray());
-        this.register('AtmosphericScatteringSky', AtmosphericScatteringSky, new SAtmosphericScatteringSky());
-        this.register('VirtualTexture', VirtualTexture, new SVirtualTexture());
         this.register('SolidColorSky', SolidColorSky, new SSolidColorSky());
 
         return this._nameToSerializeClass;

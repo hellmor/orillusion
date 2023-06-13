@@ -2,6 +2,7 @@ import { GPUAddressMode } from '../../WebGPUConst';
 import { TextureMipmapGenerator } from './TextureMipmapGenerator';
 import { webGPUContext } from '../../Context3D';
 import { TextureAsset } from './TextureAsset';
+import { NonSerialize } from '../../../../..';
 
 /**
  * Texture
@@ -22,27 +23,27 @@ export class Texture implements GPUSamplerDescriptor {
     /**
      * gpu texture
      */
-    protected gpuTexture: GPUTexture;
+    @NonSerialize protected gpuTexture: GPUTexture;
 
     /**
      * Return index in texture array
      */
-    public pid: number;
+    @NonSerialize public pid: number;
 
     /**
      * GPUTextureView
      */
-    public view: GPUTextureView; // Assigned later
+    @NonSerialize public view: GPUTextureView; // Assigned later
 
     /**
      * GPUSampler
      */
-    public gpuSampler: GPUSampler;
+    @NonSerialize public gpuSampler: GPUSampler;
 
     /**
      * GPUSampler for comparison
      */
-    public gpuSampler_comparison: GPUSampler;
+    @NonSerialize public gpuSampler_comparison: GPUSampler;
 
     /**
      * GPUTextureFormat
@@ -57,32 +58,32 @@ export class Texture implements GPUSamplerDescriptor {
     /**
      * texture width
      */
-    public width: number = 4;
+    @NonSerialize public width: number = 4;
 
     /**
      * texture height
      */
-    public height: number = 4;
+    @NonSerialize public height: number = 4;
 
     /**
      * depth or layers, default value is 1
      */
-    public depthOrArrayLayers: number = 1;
+    @NonSerialize public depthOrArrayLayers: number = 1;
 
     /**
      * depth or layers, default value is 1
      */
-    public numberLayer: number = 1;
+    @NonSerialize public numberLayer: number = 1;
 
     /**
      * GPUTextureViewDescriptor
      */
-    public viewDescriptor: GPUTextureViewDescriptor;
+    @NonSerialize public viewDescriptor: GPUTextureViewDescriptor;
 
     /**
      * GPUTextureDescriptor
      */
-    public textureDescriptor: GPUTextureDescriptor;
+    @NonSerialize public textureDescriptor: GPUTextureDescriptor;
 
     /**
      * GPUShaderStage
@@ -93,7 +94,7 @@ export class Texture implements GPUSamplerDescriptor {
     /**
      * GPUTextureBindingLayout, contains viewDimension and multisampled
      */
-    public textureBindingLayout: GPUTextureBindingLayout = {
+    @NonSerialize public textureBindingLayout: GPUTextureBindingLayout = {
         viewDimension: `2d`,
         multisampled: false,
     };
@@ -101,14 +102,14 @@ export class Texture implements GPUSamplerDescriptor {
     /**
      * GPUSamplerBindingLayout
      */
-    public samplerBindingLayout: GPUSamplerBindingLayout = {
+    @NonSerialize public samplerBindingLayout: GPUSamplerBindingLayout = {
         type: `filtering`,
     };
 
     /**
      * GPUSamplerBindingLayout
      */
-    public sampler_comparisonBindingLayout: GPUSamplerBindingLayout = {
+    @NonSerialize public sampler_comparisonBindingLayout: GPUSamplerBindingLayout = {
         type: `comparison`,
     };
 
@@ -120,8 +121,8 @@ export class Texture implements GPUSamplerDescriptor {
     /**
      *  whether is video texture
      */
-    public isVideoTexture?: boolean;
-    public isHDRTexture?: boolean;
+    @NonSerialize public isVideoTexture?: boolean;
+    @NonSerialize public isHDRTexture?: boolean;
 
     private _useMipmap: boolean = false;
 
