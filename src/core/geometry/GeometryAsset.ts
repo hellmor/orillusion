@@ -1,27 +1,20 @@
-export type GeometryAssetType = 'obj' | 'gltf' | 'glb';
+export type GeometryAssetType = 'obj' | 'gltf';
 export class GeometryAsset {
     public type: GeometryAssetType;
     public data?: any;
-    public file?: string;
+    public url?: string;
 
-    setObjGeometry(url: string, value: string): this {
+    setObj(url: string, data: string): this {
         this.type = "obj";
-        this.file = url;
-        this.data = value;
+        this.url = url;
+        this.data = data;
         return this;
     }
 
-    setGLTFGeometry(gltf: string, value: string): this {
-        this.type = 'gltf';
-        this.file = gltf;
-        this.data = value;
-        return this;
-    }
-
-    setGLBGeometry(glb: string, value: number): this {
-        this.type = "glb";
-        this.data = value;
-        this.file = glb;
+    setGLTF(url: string, data: string): this {
+        this.type = 'gltf';//glb and gltf
+        this.url = url;
+        this.data = data;
         return this;
     }
 }

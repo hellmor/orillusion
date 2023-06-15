@@ -336,7 +336,7 @@ export class OBJParser extends ParserBase {
         // att_info[VertexAttributeName.indices] = { name: VertexAttributeName.indices, data: new Uint32Array(geoData.indeice_arr) };
         // geo.setAttributes(geo.name + UUID(), att_info);
 
-        geo.asset = new GeometryAsset().setObjGeometry(this.initUrl, key);
+        geo.asset = new GeometryAsset().setObj(this.initUrl, key);
         geo.setIndices(new Uint32Array(geoData.indeice_arr));
         geo.setAttribute(VertexAttributeName.position, new Float32Array(geoData.vertex_arr));
         geo.setAttribute(VertexAttributeName.normal, new Float32Array(geoData.normal_arr));

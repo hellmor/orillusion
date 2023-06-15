@@ -1,6 +1,6 @@
 import { GUIHelp } from "@orillusion/debug/GUIHelp";
 import { SerializeTool } from "@orillusion/serialization/SerializeTool";
-import { Engine3D, MorphTargetBlender, Object3D, PlaneGeometry, PostProcessingComponent, Scene3D, Vector3 } from "@orillusion/core";
+import { Engine3D, MorphTargetBlender, Object3D, Scene3D, Vector3 } from "@orillusion/core";
 import { createExampleScene, createSceneParam } from "@samples/utils/ExampleScene";
 
 class Sample_SerializeMorph {
@@ -47,7 +47,7 @@ class Sample_SerializeMorph {
     blender: MorphTargetBlender;
 
     private async initMorphModel() {
-        this.player = await Engine3D.res.loadGltf('nanhai/nanhai.gltf');
+        this.player = await Engine3D.res.loadGltf('nanhai/nanhai.glb');
         this.player.localScale = new Vector3(this.playerScale, this.playerScale, this.playerScale);
         this.face = this.player.entityChildren[0] as Object3D;
 
@@ -57,13 +57,6 @@ class Sample_SerializeMorph {
 
         this.blender = this.player.addComponent(MorphTargetBlender);
         let targetRenderers = this.blender.cloneMorphRenderers();
-        for (let item of [this.face]) {
-            GUIHelp.addFolder(item.name)
-            GUIHelp.add(item.transform, 'rotationX', -80, 80, 1);
-            GUIHelp.add(item.transform, 'rotationY', -80, 80, 1);
-            GUIHelp.add(item.transform, 'rotationZ', -80, 80, 1);
-            GUIHelp.endFolder();
-        }
         GUIHelp.addFolder('morph controller');
         for (let key in targetRenderers) {
             this.influenceData[key] = 0.0;

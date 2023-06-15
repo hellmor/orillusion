@@ -97,11 +97,8 @@ export class SGeometryBase extends SerializeAble {
             case 'GeometryBase':
                 switch (item.asset.type) {
                     case "gltf":
-                        let gltf = Engine3D.res.getGltf(item.asset.file);
+                        let gltf = Engine3D.res.getGltf(item.asset.url);
                         geometry = gltf.resources[item.asset.data];
-                        break;
-                    case "glb":
-                        console.warn('geometry from glb cannot be supported!');
                         break;
                     case 'obj':
                         console.warn('geometry from obj cannot be supported!');

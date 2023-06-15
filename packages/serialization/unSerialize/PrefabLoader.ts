@@ -143,7 +143,9 @@ export class PrefabLoader extends ParserBase {
                     this.textureMap[uri] = texture;
                     break;
                 }
-                case 'glb-image': {
+                case 'gltf-image': {
+                    let gltf = Engine3D.res.getGltf(item.asset.url as string);
+                    texture = gltf.resources[item.name];
                     break;
                 }
             }

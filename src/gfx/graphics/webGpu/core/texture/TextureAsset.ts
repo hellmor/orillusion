@@ -1,20 +1,14 @@
 ﻿export type TextureAssetType =
     'none'
     | 'default'
-    | 'net-image' | 'hdr-net-image'
-    | 'glb-image' | 'str-base64'
+    | 'net-image' | 'hdr-net-image' | 'gltf-image'
     | 'cube-hdr' | 'cube-ldr' | 'cube-std' | 'cube-face6'
-    | 'cube-atmospheric' | 'cube-solid-color'
-    | 'video';
+    | 'cube-atmospheric' | 'cube-solid-color' | 'video';
 
 export class TextureAsset {
 
     public type: TextureAssetType;
     public url?: string | string[];
-    public index?: number | number[];
-    public srcGLTF?: string;
-    public srcGLB?: string;
-    public base64?: string;
 
     setDefault(): this {
         this.type = 'default';
@@ -33,16 +27,9 @@ export class TextureAsset {
         return this;
     }
 
-    setImageBase64(base64: string): this {
-        this.type = 'str-base64';
-        this.base64 = base64;
-        return this;
-    }
-
-    setGLBImage(glb: string, index: number): this {
-        this.type = "glb-image";
-        this.index = index;
-        this.srcGLB = glb;
+    setGLTFImage(url: string): this {
+        this.type = "gltf-image";
+        this.url = url;
         return this;
     }
 

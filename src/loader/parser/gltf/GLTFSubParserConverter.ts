@@ -379,7 +379,7 @@ export class GLTFSubParserConverter {
     private createGeometryBase(name: string, attribArrays: any, primitive: any): GeometryBase {
         let geometry = new GeometryBase();
         geometry.name = name;
-        geometry.asset = new GeometryAsset().setGLTFGeometry(this._initUrl, name);
+        geometry.asset = new GeometryAsset().setGLTF(this._initUrl, name);
         //morphTarget
         geometry.morphTargetsRelative = primitive.morphTargetsRelative;
         let targetNames = primitive.targetNames;

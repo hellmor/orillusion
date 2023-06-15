@@ -44,7 +44,7 @@ class Sample_UnSerializeMorph {
                 }
             });
         }
-        GUIHelp.open();
+        // GUIHelp.open();
     }
 }
 

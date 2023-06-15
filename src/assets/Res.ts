@@ -52,9 +52,6 @@ export class Res {
         this.initDefault();
     }
 
-    public getGltf(url: string): GLTF_Info {
-        return this._gltfPool.get(url);
-    }
 
     public getPrefabLoader(url: string) {
         return this._prefabLoaderPool.get(url);
@@ -175,7 +172,11 @@ export class Res {
         this._prefabPool.set(url, obj);
         this._gltfPool.set(url, parser.gltf);
         return obj;
-        // return null;
+    }
+
+    public getGltf(url: string): GLTF_Info {
+        let gltf = this._gltfPool.get(url)
+        return gltf;
     }
 
     /**

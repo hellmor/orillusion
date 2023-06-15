@@ -16,7 +16,7 @@ class Sample_UnSerializeScene {
     }
 
     private async loadPrefab() {
-        const url = 'prefab/test.json';
+        const url = 'prefab/scene.json';
 
         this.scene = await Engine3D.res.loadPrefab(url, PrefabLoader) as Scene3D;
         let loader = Engine3D.res.getPrefabLoader(url) as PrefabLoader;

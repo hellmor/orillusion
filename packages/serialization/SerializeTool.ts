@@ -92,9 +92,15 @@ export class SerializeTool {
         this.assets.retGeometries.forEach((item) => {
             if (item.asset) {
                 if (item.asset.type == 'gltf') {
-                    this.appendGLTF(item.asset.file);
-                } else if (item.asset.type == 'glb') {
-                    throw new Error('不支持：  ' + item.asset.file)
+                    this.appendGLTF(item.asset.url);
+                }
+            }
+        });
+
+        this.assets.retTextures.forEach((item) => {
+            if (item.asset) {
+                if (item.asset.type == 'gltf-image') {
+                    this.appendGLTF(item.asset.url as string);
                 }
             }
         });
