@@ -11,6 +11,7 @@ import { GLTFSubParserMaterial } from './GLTFSubParserMaterial';
 import { GLTFSubParserSkin } from './GLTFSubParserSkin';
 import { GLTFSubParserSkeleton } from './GLTFSubParserSkeleton';
 import { GLTFSubParserConverter } from './GLTFSubParserConverter';
+import { TextureAsset } from '../../../gfx/graphics/webGpu/core/texture/TextureAsset';
 
 /**
  * @internal
@@ -171,7 +172,10 @@ export class GLTFSubParser {
                     let bitmapTexture = new BitmapTexture2D();
                     let img = new Blob([buffer], { type: image.mimeType });
                     await bitmapTexture.loadFromBlob(img);
+                    bitmapTexture.asset = new TextureAsset().setGLTFImage(this.initUrl);
+                    bitmapTexture.name = image.name;
                     textureInfo.dtexture = bitmapTexture;
+                    this.gltf.resources[image.name] = bitmapTexture;
                 } else {
                     textureInfo.dtexture = this.gltf.resources[image.name];
                 }
@@ -283,7 +287,7 @@ export class GLTFSubParser {
         if (!this._converter) {
             this._converter = new GLTFSubParserConverter(this);
         }
-        return this._converter.convertNodeToObject3D(nodeInfo, parentNode);
+        return this._converter.convertNodeToObject3D(this.initUrl, nodeInfo, parentNode);
     }
 
     public parseSkeleton(skeletonID) {

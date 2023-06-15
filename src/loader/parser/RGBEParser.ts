@@ -1,7 +1,5 @@
 import { Texture } from '../../gfx/graphics/webGpu/core/texture/Texture';
 import { GPUTextureFormat } from '../../gfx/graphics/webGpu/WebGPUConst';
-import { HDRTexture } from '../../textures/HDRTexture';
-import { HDRTextureCube } from '../../textures/HDRTextureCube';
 import { toHalfFloat } from '../../util/Convert';
 import { ParserBase } from './ParserBase';
 
@@ -132,19 +130,8 @@ export class RGBEParser extends ParserBase {
         return this.data as Texture;
     }
 
-    public getCubeTexture() {
-        let size = this._width / 4;
-        let cubeTexture = new HDRTextureCube().createFromHDRData(size, {
-            width: this._width,
-            height: this._height,
-            array: this._rgbeArray,
-        });
-        return cubeTexture;
-    }
-
-    public getHDRTexture() {
-        let texture = new HDRTexture().create(this._width, this._height, this._rgbeArray);
-        return texture;
+    public getTextureData() {
+        return { width: this._width, height: this._height, array: this._rgbeArray }
     }
 
     protected parseError(rgbe_error_code, msg) {

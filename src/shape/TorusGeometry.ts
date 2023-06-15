@@ -38,7 +38,6 @@ export class TorusGeometry extends GeometryBase {
      */
     constructor(radius: number = 0.4, tube: number = 0.1, radialSegments: number = 32, tubularSegments: number = 32) {
         super();
-        // this.geometrySource = new SerializeGeometrySource().setPrimitive('primitive-torus');
         this.radius = radius;
         this.tube = tube;
         this.radialSegments = radialSegments;

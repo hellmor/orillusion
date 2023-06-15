@@ -1,4 +1,4 @@
-import { Object3D } from "..";
+import { NonSerialize } from "..";
 import { GUIPick } from "../components/gui/GUIPick";
 import { GUICanvas } from "../components/gui/core/GUICanvas";
 import { CEventListener } from "../event/CEventListener";
@@ -8,6 +8,7 @@ import { PickFire } from "../io/PickFire";
 import { Vector4 } from "../math/Vector4";
 import { Camera3D } from "./Camera3D";
 import { Scene3D } from "./Scene3D";
+import { Object3D } from "./entities/Object3D";
 
 export class View3D extends CEventListener {
     private _camera: Camera3D;
@@ -22,7 +23,7 @@ export class View3D extends CEventListener {
     /**
     * Graphics renderers (lines, rectangles, etc.)
     */
-    public graphic3D: Graphic3D;
+    @NonSerialize public graphic3D: Graphic3D;
 
     constructor(x: number = 0, y: number = 0, width: number = 0, height: number = 0) {
         super();
@@ -100,18 +101,34 @@ export class View3D extends CEventListener {
 
         this.scene.addChild(canvas.object3D);
 
-        if (!this.guiPick) {
-            this.guiPick = new GUIPick();
-            this.guiPick.init(this);
-        }
+        this.initGUIPick();
 
         return canvas;
     }
 
+    private initGUIPick(): void {
+        if (!this.guiPick) {
+            this.guiPick = new GUIPick();
+            this.guiPick.init(this);
+        }
+    }
     public disableUICanvas(index: number = 0) {
         let canvas = this.canvasList[index];
         if (canvas && canvas.object3D) {
             canvas.object3D.removeFromParent();
+            canvas.object3D.destroy();
+            this.canvasList.splice(index, 1);
+        }
+    }
+
+    public findUICanvas() {
+        let list: GUICanvas[] = [];
+        this.scene.getComponentsByProperty('isGUICanvas', true, true, list);
+        for (let canvas of list) {
+            this.canvasList[canvas.index] = canvas;
+        }
+        if (list.length > 0) {
+            this.initGUIPick();
         }
     }
 

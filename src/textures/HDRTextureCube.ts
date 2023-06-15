@@ -7,6 +7,7 @@ import { VirtualTexture } from './VirtualTexture';
 import { FileLoader } from '../loader/FileLoader';
 import { LoaderFunctions } from '../loader/LoaderFunctions';
 import { RGBEParser } from '../loader/parser/RGBEParser';
+import { TextureAsset } from '../gfx/graphics/webGpu/core/texture/TextureAsset';
 import { TextureCubeFaceData } from './TextureCubeFaceData';
 
 /**
@@ -77,8 +78,12 @@ export class HDRTextureCube extends TextureCube {
     */
     public async load(url: string, loaderFunctions?: LoaderFunctions): Promise<HDRTextureCube> {
         this._url = url;
+        this.asset = new TextureAsset().setCubeHDR(url);
         let loader = new FileLoader();
         let parser = await loader.load(url, RGBEParser, loaderFunctions);
-        return parser.getCubeTexture();
+        let data = parser.getTextureData();
+        this.asset = new TextureAsset().setCubeHDR(url);
+        let size = data.width / 4;
+        return this.createFromHDRData(size, data);
     }
 }

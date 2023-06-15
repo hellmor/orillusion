@@ -1,6 +1,7 @@
 import { Engine3D } from '../../Engine3D';
 import { MeshRenderer } from '../../components/renderer/MeshRenderer';
 import { Object3D } from '../../core/entities/Object3D';
+import { GeometryAsset } from '../../core/geometry/GeometryAsset';
 import { GeometryBase } from '../../core/geometry/GeometryBase';
 import { VertexAttributeName } from '../../core/geometry/VertexAttributeName';
 import { LitMaterial } from '../../materials/LitMaterial';
@@ -334,8 +335,8 @@ export class OBJParser extends ParserBase {
         // att_info[VertexAttributeName.TEXCOORD_1] = { name: VertexAttributeName.TEXCOORD_1, data: new Float32Array(geoData.uv_arr) };
         // att_info[VertexAttributeName.indices] = { name: VertexAttributeName.indices, data: new Uint32Array(geoData.indeice_arr) };
         // geo.setAttributes(geo.name + UUID(), att_info);
-        // geo.geometrySource = new SerializeGeometrySource().setObjGeometry(this.initUrl, key);
 
+        geo.asset = new GeometryAsset().setObj(this.initUrl, key);
         geo.setIndices(new Uint32Array(geoData.indeice_arr));
         geo.setAttribute(VertexAttributeName.position, new Float32Array(geoData.vertex_arr));
         geo.setAttribute(VertexAttributeName.normal, new Float32Array(geoData.normal_arr));

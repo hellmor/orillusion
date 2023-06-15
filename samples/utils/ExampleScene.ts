@@ -67,9 +67,9 @@ export function createSceneParam(): ExampleSceneParam {
                 z: -40,
             },
             euler: {
-                x: 0,
-                y: 200,
-                z: 135,
+                x: 20,
+                y: 160,
+                z: 0,
             },
 
             kelvin: 5355,
@@ -81,7 +81,7 @@ export function createSceneParam(): ExampleSceneParam {
 }
 
 /******** direction light *******/
-function createDirectLight(param: ExampleSceneParam): DirectLight {
+export function createDirectLight(param: ExampleSceneParam): DirectLight {
     let lightObj3D = new Object3D();
     lightObj3D.x = param.light.position.x;
     lightObj3D.y = param.light.position.y;

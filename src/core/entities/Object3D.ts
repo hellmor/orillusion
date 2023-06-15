@@ -5,6 +5,7 @@ import { Entity } from './Entity';
 import { Ctor } from "../../util/Global";
 import { IComponent } from '../../components/IComponent';
 import { ComponentCollect } from '../../gfx/renderJob/collect/ComponentCollect';
+import { SerializeTag } from '../../util/SerializeDecoration';
 /**
  * The base class of most objects provides a series of properties and methods for manipulating objects in three-dimensional space.
  * @group Entity
@@ -12,7 +13,7 @@ import { ComponentCollect } from '../../gfx/renderJob/collect/ComponentCollect';
 export class Object3D extends Entity {
     protected _isScene3D: boolean;
     public prefabRef?: string;
-
+    public serializeTag?: SerializeTag;
     /**
      * Instantiate a 3D object
      */
@@ -244,7 +245,10 @@ export class Object3D extends Entity {
      */
     public instantiate(): Object3D {
         let tmp = new Object3D();
-        tmp.name = this.name + "_clone";
+        tmp.name = this.name + "(clone)";
+        tmp.serializeTag = this.serializeTag;
+        tmp.prefabRef = this.prefabRef;
+
         this.entityChildren.forEach((v, k) => {
             let tmpChild = v.instantiate();
             tmp.addChild(tmpChild);

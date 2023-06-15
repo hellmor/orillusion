@@ -1,3 +1,4 @@
+import { NonSerialize } from "../..";
 import { Engine3D } from "../../Engine3D";
 import { Camera3D } from "../../core/Camera3D";
 import { View3D } from "../../core/View3D";
@@ -19,7 +20,7 @@ export class HoverCameraController extends ComponentBase {
     /**
      * camera controlling
      */
-    public camera: Camera3D;
+    @NonSerialize public camera: Camera3D;
 
     /**
      * The closest distance that the mouse wheel can operate

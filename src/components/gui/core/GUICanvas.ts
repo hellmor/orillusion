@@ -15,6 +15,7 @@ import { GUIMesh } from "./GUIMesh";
 export class GUICanvas extends ComponentBase {
     private _rebuild: GUIGeometryRebuild;
 
+    public readonly isGUICanvas: boolean = true;
     public index: number = 0;
     init() {
         super.init();
@@ -79,6 +80,14 @@ export class GUICanvas extends ComponentBase {
     }
 
     public cloneTo(obj: Object3D) {
-        console.error('UICanvas Can not be Clone!');
+        let canvas = obj.getOrAddComponent(GUICanvas);
+        canvas.copyComponent(this);
     }
+
+    public copyComponent(from: this): this {
+        super.copyComponent(from);
+        from.index = from.index;
+        return this;
+    }
+
 }
