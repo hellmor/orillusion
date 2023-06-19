@@ -20,7 +20,9 @@ export class SerializationTypes {
     private static _nameToSerializeClass: Map<string, any>;
     private static _nameToClass: Map<string, any>;
     public static registerAll() {
-        this._nameToSerializeClass ||= this.doRegister();
+        if (!this._nameToSerializeClass) {
+            this._nameToSerializeClass = this.doRegister();
+        }
     }
 
     private static doRegister(): Map<string, any> {
@@ -31,11 +33,9 @@ export class SerializationTypes {
         this.register("Scene3D", Scene3D, new SScene3D());
 
         //component
-        this.register("ComponentBase", ComponentBase, new SComponentBase());
-
-        this.register("HoverCameraController", HoverCameraController, new SComponentBase());
-
-        this.register("MorphTargetBlender", MorphTargetBlender, new SComponentBase());
+        this.registerComponent("ComponentBase", ComponentBase);
+        this.registerComponent("HoverCameraController", HoverCameraController);
+        this.registerComponent("MorphTargetBlender", MorphTargetBlender);
 
         this.register("Transform", Transform, new STransform());
         this.register("Camera3D", Camera3D, new SCamera3D());
@@ -72,6 +72,17 @@ export class SerializationTypes {
 
         return this._nameToSerializeClass;
     }
+
+    /**
+     * Register component, it'll format
+     * @param ret
+     * @returns
+     */
+    public static registerComponent(name: string, cls: any): void {
+        this.registerAll();
+        this.register(name, cls, new SComponentBase());
+    }
+
     private static register(name: string, cls: any, serialize: SerializeAble): void {
         this._nameToSerializeClass.set(name, serialize);
         this._nameToClass.set(name, cls);
