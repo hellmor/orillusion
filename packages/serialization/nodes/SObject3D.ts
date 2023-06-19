@@ -37,6 +37,7 @@ export class SScene3D extends SObject3D {
     serialize(target: Scene3D, assets: ISerializeAssetsCollect): SerializeObject3D {
         let data: SerializeScene3D = new SerializeScene3D();
         this.serializeObject3D(target, assets, data);
+        delete data.prefabRef;
         data.isScene3D = true;
         data.envMap = assets.getTextureIndex(target.envMap);
         return data;
