@@ -1,4 +1,5 @@
 import { Engine3D } from '../Engine3D';
+import { TextureAsset } from '../gfx/graphics/webGpu/core/texture/TextureAsset';
 import { Color } from '../math/Color';
 
 import { Float16ArrayTexture } from './Float16ArrayTexture';
@@ -27,6 +28,7 @@ export class SolidColorSky extends LDRTextureCube {
         Engine3D.res.fillColor(numbers, this._minSize, this._minSize, this.color.r, this.color.g, this.color.b, this.color.a);
         this._internalTexture.create(this._minSize, this._minSize, numbers, false);
         this.createFromTexture(this._minSize, this._internalTexture);
+        this.asset = new TextureAsset().setCubeSolidColor();
         return this;
     }
 

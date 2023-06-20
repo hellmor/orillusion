@@ -1,4 +1,5 @@
 import { Texture, webGPUContext } from "@orillusion/core";
+import { TextureAsset } from "../../src/gfx/graphics/webGpu/core/texture/TextureAsset";
 
 
 interface VideoFrame {
@@ -34,6 +35,7 @@ export class VideoTexture extends Texture {
             old = this.media
 
         if (typeof video === 'string') {
+            this.asset = new TextureAsset().setVideo(video as string);
             media = this.createVideo()
             media.src = video
         } else if (video.constructor.name === 'MediaStream') {
@@ -61,16 +63,16 @@ export class VideoTexture extends Texture {
         return null;
     }
 
-    protected updateGPUTexture() {}
+    protected updateGPUTexture() { }
 
     private videoTexture: GPUExternalTexture;
-    
+
     public getGPUView() {
         this.samplerBindingLayout = null;
         // force video to decoded at renderring frameRate
-        if(!this.media.paused){
+        if (!this.media.paused) {
             const videoFrame = new VideoFrame(this.media)
-             // this._des.source = videoFrame // need webgpu-developer-features
+            // this._des.source = videoFrame // need webgpu-developer-features
             videoFrame.close()
         }
         // import video current frame
@@ -80,9 +82,9 @@ export class VideoTexture extends Texture {
     }
 
     protected noticeChange() {
-        if(!this.gpuSampler)
+        if (!this.gpuSampler)
             this.gpuSampler = webGPUContext.device.createSampler(this);
-        this._stateChangeRef.forEach(v=>v());
+        this._stateChangeRef.forEach(v => v());
     }
 
     private createVideo() {

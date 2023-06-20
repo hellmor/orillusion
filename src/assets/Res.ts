@@ -33,7 +33,7 @@ export class Res {
     private _texturePool: Map<string, Texture>;
     private _materialPool: Map<string, MaterialBase>;
     private _prefabPool: Map<string, Object3D>;
-    // private _prefabLoaderPool: Map<string, PrefabLoader>;
+    private _prefabLoaderPool: Map<string, any>;
     private _gltfPool: Map<string, GLTF_Info>;
     private _atlasList: Map<string, GUIAtlasTexture>;
 
@@ -45,15 +45,34 @@ export class Res {
         this._texturePool = new Map<string, Texture>();
         this._materialPool = new Map<string, MaterialBase>();
         this._prefabPool = new Map<string, Object3D>();
-        // this._prefabLoaderPool = new Map<string, PrefabLoader>;
+        this._prefabLoaderPool = new Map<string, any>;
         this._gltfPool = new Map<string, GLTF_Info>;
         this._atlasList = new Map<string, GUIAtlasTexture>();
 
         this.initDefault();
     }
 
-    public getGltf(url: string): GLTF_Info {
-        return this._gltfPool.get(url);
+
+    public getPrefabLoader(url: string) {
+        return this._prefabLoaderPool.get(url);
+    }
+
+    /**
+     * 加载Prefab文件
+     * @param url 文件路径
+     * @param loaderClass PrefabLoader
+     * @returns
+     */
+    public async loadPrefab(url: string, loaderClass: any, loaderFunctions?: LoaderFunctions) {
+        if (this._prefabPool.has(url)) {
+            return this._prefabPool.get(url);
+        }
+        let loader = new FileLoader();
+        let parser = await loader.load(url, loaderClass, loaderFunctions, url);
+        let data = parser.data as Object3D;
+        this._prefabPool.set(url, data);
+        this._prefabLoaderPool.set(url, parser);
+        return data;
     }
 
     /**
@@ -102,11 +121,11 @@ export class Res {
     }
 
     /**
-     * get prefab by name
+     * instantiate prefab by name
      * @param name prefab name
      * @returns
      */
-    public getPrefab(name: string) {
+    public instantiatePrefab(name: string) {
         return this._prefabPool.get(name).instantiate();
     }
 
@@ -153,7 +172,11 @@ export class Res {
         this._prefabPool.set(url, obj);
         this._gltfPool.set(url, parser.gltf);
         return obj;
-        // return null;
+    }
+
+    public getGltf(url: string): GLTF_Info {
+        let gltf = this._gltfPool.get(url)
+        return gltf;
     }
 
     /**
@@ -374,6 +397,12 @@ export class Res {
     public defaultGUITexture: GUITexture;
     public defaultGUISprite: GUISprite;
 
+    private _defaultTexture: Map<string, Texture>;
+
+    public getDefaultTexture(name: string): Texture {
+        return this._defaultTexture?.get(name);
+    }
+
     /**
      * create a texture
      * @param width width of texture
@@ -386,6 +415,7 @@ export class Res {
      * @returns
      */
     public createTexture(width: number, height: number, r: number, g: number, b: number, a: number, name?: string) {
+        this._defaultTexture ||= new Map<string, Texture>();
         let w = 32;
         let h = 32;
         let textureData = new Uint8Array(w * h * 4);
@@ -395,6 +425,9 @@ export class Res {
         texture.create(16, 16, textureData, true);
         if (name) {
             this.addTexture(name, texture);
+            if (name.startsWith('default-')) {
+                this._defaultTexture.set(name, texture);
+            }
         }
         return texture;
     }

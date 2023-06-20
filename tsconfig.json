@@ -27,6 +27,6 @@
         "allowJs": true,
         "strict": false
     },  
-    "include": ["src", "test", "samples"],
+    "include": ["src", "test", "samples", "packages/serialization"],
     "exclude": ["node_modules", "dist", "public"]
 }

@@ -6,6 +6,7 @@ import { SpotLight } from "../../../components/lights/SpotLight";
 import { MeshRenderer } from "../../../components/renderer/MeshRenderer";
 import { SkinnedMeshRenderer } from "../../../components/renderer/SkinnedMeshRenderer";
 import { Object3D } from "../../../core/entities/Object3D";
+import { GeometryAsset } from "../../../core/geometry/GeometryAsset";
 import { GeometryBase } from "../../../core/geometry/GeometryBase";
 import { VertexAttributeName } from "../../../core/geometry/VertexAttributeName";
 import { BlendMode } from "../../../materials/BlendMode";
@@ -29,13 +30,14 @@ export class GLTFSubParserConverter {
     protected subParser: GLTFSubParser;
     private _testCount = 8;
     private _hasCastShadow = false;
-
+    private _initUrl: string;
     constructor(subParser: GLTFSubParser) {
         this.gltf = subParser.gltf;
         this.subParser = subParser;
     }
 
-    public async convertNodeToObject3D(nodeInfo: GLTF_Node, parentNode): Promise<Object3D> {
+    public async convertNodeToObject3D(initUrl, nodeInfo: GLTF_Node, parentNode): Promise<Object3D> {
+        this._initUrl = initUrl;
         const node = new Object3D();
         node.name = nodeInfo.name;
         node[GLTFType.GLTF_NODE_INDEX_PROPERTY] = nodeInfo.nodeId;
@@ -377,8 +379,7 @@ export class GLTFSubParserConverter {
     private createGeometryBase(name: string, attribArrays: any, primitive: any): GeometryBase {
         let geometry = new GeometryBase();
         geometry.name = name;
-
-        // geometry.geometrySource = new SerializeGeometrySource().setGLTFGeometry(this.initUrl, name);
+        geometry.asset = new GeometryAsset().setGLTF(this._initUrl, name);
         //morphTarget
         geometry.morphTargetsRelative = primitive.morphTargetsRelative;
         let targetNames = primitive.targetNames;

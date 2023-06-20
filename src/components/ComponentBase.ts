@@ -2,6 +2,7 @@ import { View3D } from "../core/View3D";
 import { Object3D } from "../core/entities/Object3D";
 import { CEventDispatcher } from "../event/CEventDispatcher";
 import { ComponentCollect } from "../gfx/renderJob/collect/ComponentCollect";
+import { NonSerialize } from "../util/SerializeDecoration";
 import { IComponent } from "./IComponent";
 import { Transform } from "./Transform";
 
@@ -14,7 +15,7 @@ export class ComponentBase implements IComponent {
     /**
      * owner object3D
      */
-    public object3D: Object3D = null;
+    @NonSerialize public object3D: Object3D = null;
 
     /**
      * @internal
@@ -121,6 +122,8 @@ export class ComponentBase implements IComponent {
      * @param obj target object3D
      */
     public cloneTo(obj: Object3D) { }
+
+    public copyComponent(from: this): this { return this; }
 
     /**
      * internal

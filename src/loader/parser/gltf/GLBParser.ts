@@ -33,6 +33,10 @@ export class GLBParser extends ParserBase {
 
     private _gltf: GLTF_Info;
 
+    public get gltf() {
+        return this._gltf;
+    }
+
     public async parseBuffer(buffer: ArrayBuffer) {
         let byteArray = new Uint8Array(buffer);
         byteArray['pos'] = 0;
@@ -70,7 +74,7 @@ export class GLBParser extends ParserBase {
             let newUint = chunkJSONData.subarray(i, i + count);
             gltfJSON += String.fromCharCode(...newUint);
         }
-        console.log(performance.now() - time);
+        // console.log(performance.now() - time);
 
         // let gltfJSON = String.fromCharCode(...chunks[0].chunkData) ;//.apply(null, chunks[0].chunkData);
         let obj = JSON.parse(gltfJSON) as object;
@@ -83,20 +87,21 @@ export class GLBParser extends ParserBase {
             buffer.dbuffer = chunks[i + 1].chunkData.buffer;
         }
 
-        if (this._gltf.images) {
-            for (let i = 0; i < this._gltf.images.length; i++) {
-                let image = this._gltf.images[i];
-                image.name = image.name || 'bufferView_' + image.bufferView.toString();
-                const bufferView = this._gltf.bufferViews[image.bufferView];
-                const buffer = this._gltf.buffers[bufferView.buffer];
-                let dataBuffer = new Uint8Array(buffer.dbuffer, bufferView.byteOffset, bufferView.byteLength);
-                let imgData = new Blob([dataBuffer], { type: image.mimeType });
-                let dtexture = new BitmapTexture2D();
-                await dtexture.loadFromBlob(imgData);
-                dtexture.name = image.name;
-                this._gltf.resources[image.name] = dtexture;
-            }
-        }
+        // if (this._gltf.images) {
+        //     for (let i = 0; i < this._gltf.images.length; i++) {
+        //         let image = this._gltf.images[i];
+        //         image.name = image.name || 'bufferView_' + image.bufferView.toString();
+        //         const bufferView = this._gltf.bufferViews[image.bufferView];
+        //         const buffer = this._gltf.buffers[bufferView.buffer];
+        //         let dataBuffer = new Uint8Array(buffer.dbuffer, bufferView.byteOffset, bufferView.byteLength);
+        //         let imgData = new Blob([dataBuffer], { type: image.mimeType });
+        //         let dtexture = new BitmapTexture2D();
+        //         dtexture.asset = new TextureAsset().setGLBImage(this.initUrl, i);
+        //         await dtexture.loadFromBlob(imgData);
+        //         dtexture.name = image.name;
+        //         this._gltf.resources[image.name] = dtexture;
+        //     }
+        // }
 
         let subParser = new GLTFSubParser();
         let nodes = await subParser.parse(this.initUrl, this._gltf, this._gltf.scene);

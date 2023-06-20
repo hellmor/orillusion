@@ -52,7 +52,6 @@ export class SphereGeometry extends GeometryBase {
      */
     constructor(radius, widthSegments, heightSegments, phiStart?, phiLength?, thetaStart?, thetaLength?) {
         super();
-        // this.geometrySource = new SerializeGeometrySource().setPrimitive('primitive-sphere');
         // this.v_Stride = 1 + 3 + 3 + 3 + 2 + 2 + 4;
         // this.vertexFormat = VertexFormat.INDEX | VertexFormat.POSITION | VertexFormat.NORMAL | VertexFormat.TANGENT | VertexFormat.UV0 | VertexFormat.UV1 | VertexFormat.COLOR;
 

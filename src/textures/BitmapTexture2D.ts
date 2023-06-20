@@ -3,6 +3,7 @@ import { LoaderBase } from '../loader/LoaderBase';
 import { LoaderFunctions } from '../loader/LoaderFunctions';
 import { StringUtil } from '../util/StringUtil';
 import { Texture } from '../gfx/graphics/webGpu/core/texture/Texture';
+import { TextureAsset } from '../gfx/graphics/webGpu/core/texture/TextureAsset';
 
 /**
  * bitmap texture
@@ -54,6 +55,7 @@ export class BitmapTexture2D extends Texture {
      * @param loaderFunctions callback function when load complete
      */
     public async load(url: string, loaderFunctions?: LoaderFunctions) {
+        this.asset = new TextureAsset().setNetImage(url);
         if (url.indexOf(';base64') != -1) {
             const img = document.createElement('img');
             let start = url.indexOf('data:image');
