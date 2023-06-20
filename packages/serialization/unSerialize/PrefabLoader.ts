@@ -198,7 +198,9 @@ export class PrefabLoader extends ParserBase {
             }
             UnSerializationUtil.unSerialize(node, item, this.assets);
             if (item.index == 0) {
-                node.prefabRef = this.initUrl;
+                if (!node.isScene3D) {
+                    node.prefabRef = this.initUrl;
+                }
                 this.data = node;
                 this.assets.rootNode = node;
             }

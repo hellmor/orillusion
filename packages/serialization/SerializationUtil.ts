@@ -32,19 +32,16 @@ export class SerializationUtil {
 
     public static serializationNode(source: any, assets: ISerializeAssetsCollect, property: string, dst: any) {
         let ins = source[property];
+        let t = typeof ins;
 
-        if (ins) {
-            let t = typeof ins;
-            if (t == 'string' || t == 'number' || t == 'boolean') {
-                dst[property] = ins;
-            } else {
-                let util = SerializationTypes.getSerializeByInstance(ins);
-                if (util) {
-                    dst[property] = util.serialize(ins, assets);
-                }
+        let isValueObject = t == 'number' || t == 'boolean' || t == 'string';
+        if (isValueObject) {
+            dst[property] = ins;
+        } else if (ins) {
+            let util = SerializationTypes.getSerializeByInstance(ins);
+            if (util) {
+                dst[property] = util.serialize(ins, assets);
             }
-
-
         }
         return dst;
     }

@@ -1,4 +1,5 @@
 import { GUIHelp } from "@orillusion/debug/GUIHelp";
+import { AtmosphericComponent, BillboardType, Color, DirectLight, Engine3D, GPUCullMode, GTAOSetting, GlobalIlluminationComponent, PointLight, SpotLight, Transform, UIImage, UIPanel, UIShadow, View3D } from "@orillusion/core";
 import { UVMoveComponent } from "@samples/material/script/UVMoveComponent";
 
 export class GUIUtil {
