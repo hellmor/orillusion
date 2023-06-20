@@ -18,6 +18,9 @@ export class SerializeMaterialInstance extends SerializeIndex {
     public shaderState: any;
     public defineValue: { [name: string]: any };
     public constValues: { [name: string]: any };
+    public sort: number;
+    public transparent: boolean;
+    public enable: boolean;
 }
 
 export class SerializeTextureInstance extends SerializeIndex {
