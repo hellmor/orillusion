@@ -75,6 +75,19 @@ export class LitMaterial extends PhysicMaterial {
         ret.ior = this.ior;
         ret.clearcoatFactor = this.clearcoatFactor;
         ret.clearcoatRoughnessFactor = this.clearcoatRoughnessFactor;
+
+        this.clearcoatColor && (ret.clearcoatColor = this.clearcoatColor.clone());
+        ret.clearcoatWeight = this.clearcoatWeight;
+        ret.transparent = this.transparent;
+        ret.cullMode = this.cullMode;
+        ret.blendMode = this.blendMode;
+
+        for (let key in this.renderShader.defineValue) {
+            ret.renderShader.defineValue[key] = this.renderShader.defineValue[key];
+        }
+        for (let key in this.renderShader.constValues) {
+            ret.renderShader.constValues[key] = this.renderShader.constValues[key];
+        }
         return ret as this;
     }
 
