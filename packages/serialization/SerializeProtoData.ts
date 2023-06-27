@@ -4,7 +4,8 @@ type v4 = { x: number, y: number, z: number, w: number };
 type rgb = { r: number, g: number, b: number };
 type rgba = { r: number, g: number, b: number, a: number };
 type rgbe = { r: number, g: number, b: number, e: number };
-type rect = { x: number, y: number, width: number, height: number }
+type rect = { x: number, y: number, width: number, height: number };
+
 export type SerializeProtoType =
     'v4' | 'v3' | 'v2' | 'vn'
     | 'rgba' | 'rgb' | 'rgbe'
@@ -109,9 +110,9 @@ export class SerializeProtoData {
         return ret;
     }
 
-    public static readFloat32Array(list: Float32Array | number[], ret: Float32Array | number[]): void {
-        for (let i = 0, c = list.length; i < c; i++) {
-            ret[i] = list[i];
+    public static readFloat32Array(value: SerializeProtoData, ret: Float32Array | number[]): void {
+        for (let i = 0, c = value.data.length; i < c; i++) {
+            ret[i] = value.data[i];
         }
     }
 

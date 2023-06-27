@@ -44,6 +44,10 @@ export class SerializeMaterialUniform {
                 case 'number':
                     material.renderShader.setUniformFloat(key, data0 as number);
                     break;
+                case 'vn':
+                    let float32Array = new Float32Array(data.data.length);
+                    SerializeProtoData.readFloat32Array(data, float32Array);
+                    break;
                 case 'v4':
                     let vector4: Vector4 = new Vector4();
                     SerializeProtoData.readVector4(data, vector4);
@@ -67,8 +71,6 @@ export class SerializeMaterialUniform {
                 case 'rgbe':
                     break;
                 case 'rgb':
-                    break;
-                case 'f32Array':
                     break;
 
                 default:
