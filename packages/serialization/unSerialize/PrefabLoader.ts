@@ -304,7 +304,7 @@ export class PrefabLoader extends ParserBase {
             fogPost.end = postProcessing.globalFog.end;
             let fogColor = postProcessing.globalFog.fogColor;
             fogPost.fogColor = new Color(fogColor.r, fogColor.g, fogColor.b, fogColor.a);
-            fogPost.height = postProcessing.globalFog.height;
+            fogPost.fogHeightScale = postProcessing.globalFog.fogHeightScale;
             fogPost.density = postProcessing.globalFog.density;
             fogPost.fogType = postProcessing.globalFog.fogType;
             fogPost.start = postProcessing.globalFog.start;

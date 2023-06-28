@@ -64,7 +64,7 @@ export class GLBParser extends ParserBase {
             return false;
         }
 
-        let time = performance.now();
+        // let time = performance.now();
         let gltfJSON = '';
         let maxCount = 65535;
         let chunkJSONData = chunks[0].chunkData;

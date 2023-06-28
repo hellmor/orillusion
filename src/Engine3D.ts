@@ -135,12 +135,19 @@ export class Engine3D {
                     debug: false,
                     enable: false,
                     fogType: 0.0,
-                    height: 0,
-                    start: 0,
-                    end: 0,
+                    fogHeightScale: 0.1,
+                    start: 400,
+                    end: 10,
                     density: 0.02,
                     ins: 0.5,
-                    fogColor: new Color(84 / 255, 90 / 255, 239 / 255, 1),
+                    skyFactor: 0.5,
+                    skyRoughness: 0.4,
+                    overrideSkyFactor: 0.8,
+                    fogColor: new Color(112 / 255, 61 / 255, 139 / 255, 1),
+                    falloff: 0.7,
+                    rayLength: 200.0,
+                    scatteringExponent: 2.7,
+                    dirHeightLine: 10.0,
                 },
                 ssao: {
                     enable: false,
@@ -261,7 +268,7 @@ export class Engine3D {
             type: 'HDRSKY',
             sky: null,
             skyExposure: 1.0,
-            defaultFar: 1000000,
+            defaultFar: 65536,//can't be to big
             defaultNear: 1,
         },
         light: {
@@ -285,7 +292,7 @@ export class Engine3D {
      * @returns
      */
     public static async init(descriptor: { canvasConfig?: CanvasConfig; beforeRender?: Function; renderLoop?: Function; lateRender?: Function, engineSetting?: EngineSetting } = {}) {
-        console.log('engine version', version);
+        console.log('Engine Version', version);
 
         this.setting = { ...this.setting, ...descriptor.engineSetting }
 

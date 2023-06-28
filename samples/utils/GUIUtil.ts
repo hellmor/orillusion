@@ -1,5 +1,5 @@
 import { GUIHelp } from "@orillusion/debug/GUIHelp";
-import { AtmosphericComponent, BillboardType, Color, DirectLight, Engine3D, GPUCullMode, GTAOSetting, GlobalIlluminationComponent, PointLight, SpotLight, Transform, UIImage, UIPanel, UIShadow, View3D } from "@orillusion/core";
+import { AtmosphericComponent, BillboardType, Color, DirectLight, Engine3D, GPUCullMode, GTAOSetting, GlobalFog, GlobalIlluminationComponent, PointLight, SpotLight, Transform, UIImage, UIPanel, UIShadow, View3D } from "@orillusion/core";
 import { UVMoveComponent } from "@samples/material/script/UVMoveComponent";
 
 export class GUIUtil {
@@ -17,6 +17,31 @@ export class GUIUtil {
         GUIHelp.add(component, 'sunBrightness', 0, 10, 0.01);
         GUIHelp.add(component, 'exposure', 0, 2, 0.01);
         GUIHelp.add(component, 'displaySun', 0, 1, 0.01);
+        open && GUIHelp.open();
+        GUIHelp.endFolder();
+    }
+
+    public static renderGlobalFog(fog: GlobalFog, open: boolean = true, name?: string) {
+        name ||= 'GlobalFog';
+        GUIHelp.addFolder(name);
+        GUIHelp.add(fog, 'fogType', {
+            Liner: 0,
+            Exp: 1,
+            Exp2: 2,
+        });
+        GUIHelp.add(fog, 'start', -0.0, 1000.0, 0.0001);
+        GUIHelp.add(fog, 'end', -0.0, 1000.0, 0.0001);
+        GUIHelp.add(fog, 'fogHeightScale', 0.0001, 1.0, 0.0001);
+        GUIHelp.add(fog, 'density', 0.0, 1.0, 0.0001);
+        GUIHelp.add(fog, 'ins', 0.0, 5.0, 0.0001);
+        GUIHelp.add(fog, 'skyFactor', 0.0, 1.0, 0.0001);
+        GUIHelp.add(fog, 'skyRoughness', 0.0, 1.0, 0.0001);
+        GUIHelp.add(fog, 'overrideSkyFactor', 0.0, 1.0, 0.0001);
+        GUIHelp.add(fog, 'falloff', 0.0, 100.0, 0.01);
+        GUIHelp.add(fog, 'rayLength', 0.01, 2000.0, 0.01);
+        GUIHelp.add(fog, 'scatteringExponent', 1, 40.0, 0.001);
+        GUIHelp.add(fog, 'dirHeightLine', 0.0, 20.0, 0.01);
+        GUIHelp.addColor(fog, 'fogColor');
         open && GUIHelp.open();
         GUIHelp.endFolder();
     }
@@ -272,6 +297,48 @@ export class GUIUtil {
         // change billboard by click dropdown box
         GUIHelp.add({ billboard: panel.billboard }, 'billboard', billboard).onChange((v) => {
             panel.billboard = v;
+        });
+
+        let scissorData = {
+            scissorCornerRadius: panel.scissorCornerRadius,
+            scissorFadeOutSize: panel.scissorFadeOutSize,
+            panelWidth: 400,
+            panelHeight: 300,
+            backGroundVisible: panel.visible,
+            backGroundColor: panel.color,
+            scissorEnable: panel.scissorEnable
+
+        };
+        let changeSissor = () => {
+            panel.scissorCornerRadius = scissorData.scissorCornerRadius;
+            panel.scissorEnable = scissorData.scissorEnable;
+            panel.scissorFadeOutSize = scissorData.scissorFadeOutSize;
+            panel.color = scissorData.backGroundColor;
+            panel.visible = scissorData.backGroundVisible;
+            panel.uiTransform.resize(scissorData.panelWidth, scissorData.panelHeight);
+        }
+        GUIHelp.add(scissorData, 'scissorCornerRadius', 0, 100, 0.1).onChange(() => {
+            changeSissor();
+        });
+        GUIHelp.add(scissorData, 'scissorFadeOutSize', 0, 100, 0.1).onChange(() => {
+            changeSissor();
+        });
+        GUIHelp.add(scissorData, 'panelWidth', 1, 400, 1).onChange(() => {
+            changeSissor();
+        });
+        GUIHelp.add(scissorData, 'panelHeight', 1, 300, 1).onChange(() => {
+            changeSissor();
+        });
+        GUIHelp.add(scissorData, 'backGroundVisible').onChange(() => {
+            changeSissor();
+        });
+
+        GUIHelp.addColor(scissorData, 'backGroundColor').onChange(() => {
+            changeSissor();
+        });
+
+        GUIHelp.add(scissorData, 'scissorEnable').onChange(() => {
+            changeSissor();
         });
 
         //depth test
