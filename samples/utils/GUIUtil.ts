@@ -1,5 +1,5 @@
 import { GUIHelp } from "@orillusion/debug/GUIHelp";
-import { AtmosphericComponent, BillboardType, Color, DirectLight, Engine3D, GPUCullMode, GTAOSetting, GlobalFog, GlobalIlluminationComponent, PointLight, SpotLight, Transform, UIImage, UIPanel, UIShadow, View3D } from "@orillusion/core";
+import { AtmosphericComponent, BillboardType, Color, DirectLight, Engine3D, GPUCullMode, GlobalFog, GlobalIlluminationComponent, PointLight, SpotLight, Transform, UIImage, UIPanel, UIShadow, View3D } from "@orillusion/core";
 import { UVMoveComponent } from "@samples/material/script/UVMoveComponent";
 
 export class GUIUtil {
@@ -10,13 +10,15 @@ export class GUIUtil {
         name ||= 'AtmosphericSky';
         GUIHelp.addFolder(name);
         GUIHelp.add(component, 'sunX', 0, 1, 0.01);
-        GUIHelp.add(component, 'sunY', 0, 1, 0.01);
+        GUIHelp.add(component, 'sunY', 0.4, 1.6, 0.01);
         GUIHelp.add(component, 'eyePos', 0, 5000, 1);
         GUIHelp.add(component, 'sunRadius', 0, 1000, 0.01);
         GUIHelp.add(component, 'sunRadiance', 0, 100, 0.01);
         GUIHelp.add(component, 'sunBrightness', 0, 10, 0.01);
         GUIHelp.add(component, 'exposure', 0, 2, 0.01);
         GUIHelp.add(component, 'displaySun', 0, 1, 0.01);
+        GUIHelp.add(component, 'enable');
+
         open && GUIHelp.open();
         GUIHelp.endFolder();
     }
