@@ -18,12 +18,12 @@ export class Uint16Texture extends Texture {
      * @param useMipmap whether or not gen mipmap
      * @returns
      */
-    public create(width: number, height: number, data: Float32Array, useMiamp: boolean = true) {
+    public create(width: number, height: number, data: Float32Array, useMipmap: boolean = true) {
         let device = webGPUContext.device;
         const bytesPerRow = width * 4 * 4;
         this.format = GPUTextureFormat.rgba16float;
 
-        this.mipmapCount = Math.floor(useMiamp ? Math.log2(width) : 1);
+        this.mipmapCount = Math.floor(useMipmap ? Math.log2(width) : 1);
         this.createTextureDescriptor(width, height, this.mipmapCount, this.format);
 
         const textureDataBuffer = device.createBuffer({
@@ -64,7 +64,7 @@ export class Uint16Texture extends Texture {
         this.textureBindingLayout.sampleType = `float`;
         this.gpuSampler = device.createSampler(this);
 
-        if (this.mipmapCount > 1) {
+        if (this.mipmapCount > 1 && this.useMipmap) {
             TextureMipmapGenerator.webGPUGenerateMipmap(this);
         }
     }
