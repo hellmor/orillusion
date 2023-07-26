@@ -312,7 +312,7 @@ export class Entity extends CEventDispatcher {
     }
 
     public get bound(): IBound {
-        this.updateBound();
+        (this._isBoundChange || !this._bound) && this.updateBound();
         return this._boundWorld;
     }
 
@@ -324,7 +324,7 @@ export class Entity extends CEventDispatcher {
 
     private updateBound(): IBound {
         if (!this._bound) {
-            this._bound = new BoundingBox(Vector3.ZERO.clone(), Vector3.ONE.clone());
+            this._bound = new BoundingBox();
             this._boundWorld = this._bound.clone();
             this._isBoundChange = true;
         }

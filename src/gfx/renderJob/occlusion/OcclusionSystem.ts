@@ -1,6 +1,8 @@
 import { RenderNode } from '../../../components/renderer/RenderNode';
+import { BoundingBox } from '../../../core/bound/BoundingBox';
 import { Camera3D } from '../../../core/Camera3D';
 import { Scene3D } from '../../../core/Scene3D';
+import { OctreeEntity } from '../../../core/tree/octree/OctreeEntity';
 import { Engine3D } from '../../../Engine3D';
 import { EntityCollect } from '../collect/EntityCollect';
 /**
@@ -12,9 +14,11 @@ export class OcclusionSystem {
     public zVisibleList: Float32Array;
 
     private _renderList: Map<Camera3D, Map<RenderNode, number>>
+    private _frustumBound: BoundingBox;
 
     constructor() {
         this._renderList = new Map<Camera3D, Map<RenderNode, number>>();
+        this._frustumBound = new BoundingBox();
     }
 
     /**
@@ -52,42 +56,55 @@ export class OcclusionSystem {
         }
         cameraViewRenderList.clear();
         EntityCollect.instance.autoSortRenderNodes(scene);
-        let nodes = EntityCollect.instance.getRenderNodes(scene);
-        // for (let i = 0; i < nodes.opaqueList.length; i++) {
-        //     const node = nodes.opaqueList[i];
-        //     if(node.object3D.transform[`_localChange`])
-        //         node.object3D.transform.updateWorldMatrix();
-        // }
-        // for (let i = 0; i < nodes.transparentList.length; i++) {
-        //     const node = nodes.transparentList[i];
-        //     if(node.object3D.transform[`_localChange`])
-        //         node.object3D.transform.updateWorldMatrix();
-        // }
 
-        for (let i = 0; i < nodes.opaqueList.length; i++) {
-            const node = nodes.opaqueList[i];
-            let inRender = 0;
+        let collectInfo = EntityCollect.instance.getRenderNodes(scene);
+        if (Engine3D.setting.occlusionQuery.octree) {
+            let fillterList: OctreeEntity[] = [];
+            // let now = performance.now();
+            // {
+            //     let range = camera.frustum.genBox(camera.pvMatrixInv);
+            //     this._frustumBound.min.set(range.minX, range.minY, range.minZ);
+            //     this._frustumBound.max.set(range.maxX, range.maxY, range.maxZ);
+            //     this._frustumBound.setFromMinMax(this._frustumBound.min, this._frustumBound.max);
+            //     collectInfo.opTree.boxCasts(this._frustumBound, fillterList);
+            //     collectInfo.trTree.boxCasts(this._frustumBound, fillterList);
+            // }
+            collectInfo.opTree.frustumCasts(camera.frustum, fillterList);
+            collectInfo.trTree.frustumCasts(camera.frustum, fillterList);
 
-            if (node.enable && node.transform.enable && node.object3D.bound) {
-                inRender = node.object3D.bound.containsFrustum(node.object3D, camera.frustum);
+            // console.log('cast', performance.now() - now, fillterList.length);
+            for (let item of fillterList) {
+                cameraViewRenderList.set(item.renderer, 1);
+            }
+        } else {
+            // let now = performance.now();
+            for (let node of collectInfo.opaqueList) {
+                let inRender = 0;
+
+                if (node.enable && node.transform.enable) {
+                    inRender = camera.frustum.containsBox(node.object3D.bound);
+                }
+
+                if (inRender) {
+                    cameraViewRenderList.set(node, inRender);
+                }
             }
 
-            if (inRender) {
-                cameraViewRenderList.set(node, inRender);
+            for (let node of collectInfo.transparentList) {
+                let inRender = 0;
+                if (node.enable && node.transform.enable) {
+                    inRender = camera.frustum.containsBox(node.object3D.bound);
+                }
+
+                if (inRender) {
+                    cameraViewRenderList.set(node, inRender);
+                }
             }
+            // console.log('cast', performance.now() - now);
+
         }
 
-        for (let i = 0; i < nodes.transparentList.length; i++) {
-            const node = nodes.transparentList[i];
-            let inRender = 0;
-            if (node.enable && node.transform.enable && node.object3D.bound) {
-                inRender = node.object3D.bound.containsFrustum(node.object3D, camera.frustum);
-            }
 
-            if (inRender) {
-                cameraViewRenderList.set(node, inRender);
-            }
-        }
     }
 
     renderCommitTesting(camera: Camera3D, renderNode: RenderNode): boolean {
