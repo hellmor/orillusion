@@ -111,7 +111,7 @@ export class Sample_OctTreeFrustum {
     }
 
     loop() {
-        // this.entities && this.octreeTest();
+        this.entities && this.octreeTest();
     }
 
 }

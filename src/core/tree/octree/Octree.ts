@@ -13,18 +13,21 @@ export class Octree {
   // private static _sphere = new Sphere();
   // private static _capsule = new Capsule();
   public readonly entities: Map<string, OctreeEntity>;
-
   public readonly box: BoundingBox;
-  public subTrees: Octree[] = [];
+  public readonly subTrees: Octree[] = [];
   public readonly parent: Octree;
   public readonly level: number;
   public static readonly maxSplitLevel = 6;
   private static readonly autoSplitLevel = 3;
+  public readonly index: number;
+  public readonly uuid: string;
 
-  constructor(size: BoundingBox, parent: Octree = null, level: number = 0) {
+  constructor(size: BoundingBox, index: number = 0, parent: Octree = null, level: number = 0) {
     this.parent = parent;
     this.box = size.clone() as BoundingBox;
     this.level = level;
+    this.index = index;
+    this.uuid = level + '_' + index;
     this.entities = new Map<string, OctreeEntity>();
   }
 
@@ -61,6 +64,7 @@ export class Octree {
       const v = Octree._v1;
       const halfsize = this.box.extents.clone();
       let childLevel: number = this.level + 1;
+      let index = 0;
       for (let x = 0; x < 2; x++) {
         for (let y = 0; y < 2; y++) {
           for (let z = 0; z < 2; z++) {
@@ -68,7 +72,7 @@ export class Octree {
             this.box.min.add(v.set(x, y, z).multiply(halfsize), box.min);
             box.min.add(halfsize, box.max);
             box.setFromMinMax(box.min, box.max);
-            let subTree = new Octree(box, this, childLevel);
+            let subTree = new Octree(box, index++, this, childLevel);
             this.subTrees.push(subTree);
           }
         }
@@ -76,8 +80,9 @@ export class Octree {
     }
   }
 
-  rayCasts(ray: Ray, ret: OctreeEntity[]) {
-    if (ray.intersectBox(this.box)) {
+  __rayCastTempVector: Vector3 = new Vector3();
+  rayCasts(ray: Ray, ret: OctreeEntity[]): boolean {
+    if (this.level == 0 || ray.intersectBox(this.box, this.__rayCastTempVector)) {
       if (this.entities.size > 0) {
         ret.push(...this.entities.values());
       }
@@ -90,7 +95,7 @@ export class Octree {
   }
 
   frustumCasts(frustum: Frustum, ret: OctreeEntity[]) {
-    if (frustum.containsBox2(this.box) > 0) {
+    if (this.level == 0 || frustum.containsBox2(this.box) > 0) {
       if (this.entities.size > 0) {
         for (const item of this.entities.values()) {
           if (this.level > Octree.autoSplitLevel || frustum.containsBox2(item.renderer.object3D.bound) > 0) {
@@ -119,6 +124,14 @@ export class Octree {
     return false;
   }
 
+  clean(): this {
+    for (let item of this.entities.values()) {
+      item.leaveNode();
+    }
+    this.entities.clear();
+    return this;
+  }
+
   // getRayTriangles(ray, triangles) {
   //   for (let subTree of this.subTrees) {
   //     if (!ray.intersectsBox(subTree.box)) {
@@ -128,7 +141,7 @@ export class Octree {
 
   //     let count = subTree.entities.length;
   //     if (count > 0) {
-  //       let tempTriangle: ElpOctreeEntity;
+  //       let tempTriangle: OctreeEntity;
   //       for (let j = 0; j < count; j++) {
   //         tempTriangle = subTree.entities[j];
   //         if (triangles.indexOf(tempTriangle) == -1) {
@@ -145,9 +158,9 @@ export class Octree {
   // }
 
   // triangleCapsuleIntersect(capsule, triangle) {
-  //   triangle.getPlane(ElpOctree._plane);
-  //   const d1 = ElpOctree._plane.distanceToPoint(capsule.start) - capsule.radius;
-  //   const d2 = ElpOctree._plane.distanceToPoint(capsule.end) - capsule.radius;
+  //   triangle.getPlane(Octree._plane);
+  //   const d1 = Octree._plane.distanceToPoint(capsule.start) - capsule.radius;
+  //   const d2 = Octree._plane.distanceToPoint(capsule.end) - capsule.radius;
 
   //   if ((d1 > 0 && d2 > 0) || (d1 < -capsule.radius && d2 < -capsule.radius)) {
   //     return false;
@@ -155,11 +168,11 @@ export class Octree {
 
   //   const delta = Math.abs(d1 / (Math.abs(d1) + Math.abs(d2)));
 
-  //   const intersectPoint = ElpOctree._v1.copy(capsule.start).lerp(capsule.end, delta);
+  //   const intersectPoint = Octree._v1.copy(capsule.start).lerp(capsule.end, delta);
 
   //   if (triangle.containsPoint(intersectPoint)) {
   //     return {
-  //       normal: ElpOctree._plane.normal.clone(),
+  //       normal: Octree._plane.normal.clone(),
   //       point: intersectPoint.clone(),
   //       depth: Math.abs(Math.min(d1, d2)),
   //     };
@@ -167,7 +180,7 @@ export class Octree {
 
   //   const r2 = capsule.radius * capsule.radius;
 
-  //   const line1 = ElpOctree._line1.set(capsule.start, capsule.end);
+  //   const line1 = Octree._line1.set(capsule.start, capsule.end);
 
   //   const lines = [
   //     [triangle.a, triangle.b],
@@ -176,7 +189,7 @@ export class Octree {
   //   ];
 
   //   for (let i = 0; i < lines.length; i++) {
-  //     const line2 = ElpOctree._line2.set(lines[i][0], lines[i][1]);
+  //     const line2 = Octree._line2.set(lines[i][0], lines[i][1]);
 
   //     const [point1, point2] = capsule.lineLineMinimumPoints(line1, line2);
 
@@ -193,18 +206,18 @@ export class Octree {
   // }
 
   // triangleSphereIntersect(sphere, triangle) {
-  //   triangle.getPlane(ElpOctree._plane);
-  //   if (!sphere.intersectsPlane(ElpOctree._plane)) return false;
-  //   const depth = Math.abs(ElpOctree._plane.distanceToSphere(sphere));
+  //   triangle.getPlane(Octree._plane);
+  //   if (!sphere.intersectsPlane(Octree._plane)) return false;
+  //   const depth = Math.abs(Octree._plane.distanceToSphere(sphere));
   //   const r2 = sphere.radius * sphere.radius - depth * depth;
 
-  //   const plainPoint = ElpOctree._plane.projectPoint(sphere.center, ElpOctree._v1);
+  //   const plainPoint = Octree._plane.projectPoint(sphere.center, Octree._v1);
 
   //   if (triangle.containsPoint(sphere.center)) {
   //     return {
-  //       normal: ElpOctree._plane.normal.clone(),
+  //       normal: Octree._plane.normal.clone(),
   //       point: plainPoint.clone(),
-  //       depth: Math.abs(ElpOctree._plane.distanceToSphere(sphere)),
+  //       depth: Math.abs(Octree._plane.distanceToSphere(sphere)),
   //     };
   //   }
 
@@ -215,16 +228,16 @@ export class Octree {
   //   ];
 
   //   for (let i = 0; i < lines.length; i++) {
-  //     ElpOctree._line1.set(lines[i][0], lines[i][1]);
+  //     Octree._line1.set(lines[i][0], lines[i][1]);
 
-  //     ElpOctree._line1.closestPointToPoint(plainPoint, true, ElpOctree._v2);
+  //     Octree._line1.closestPointToPoint(plainPoint, true, Octree._v2);
 
-  //     const d = ElpOctree._v2.distanceToSquared(sphere.center);
+  //     const d = Octree._v2.distanceToSquared(sphere.center);
 
   //     if (d < r2) {
   //       return {
-  //         normal: sphere.center.clone().sub(ElpOctree._v2).normalize(),
-  //         point: ElpOctree._v2.clone(),
+  //         normal: sphere.center.clone().sub(Octree._v2).normalize(),
+  //         point: Octree._v2.clone(),
   //         depth: sphere.radius - Math.sqrt(d),
   //       };
   //     }
@@ -262,7 +275,7 @@ export class Octree {
   // }
 
   // sphereIntersect(sphere) {
-  //   ElpOctree._sphere.copy(sphere);
+  //   Octree._sphere.copy(sphere);
 
   //   const triangles = [];
   //   let result,
@@ -270,15 +283,15 @@ export class Octree {
   //   this.getSphereTriangles(sphere, triangles);
 
   //   for (let i = 0; i < triangles.length; i++) {
-  //     if ((result = this.triangleSphereIntersect(ElpOctree._sphere, triangles[i]))) {
+  //     if ((result = this.triangleSphereIntersect(Octree._sphere, triangles[i]))) {
   //       hit = true;
 
-  //       ElpOctree._sphere.center.add(result.normal.multiplyScalar(result.depth));
+  //       Octree._sphere.center.add(result.normal.multiplyScalar(result.depth));
   //     }
   //   }
 
   //   if (hit) {
-  //     const collisionVector = ElpOctree._sphere.center.clone().sub(sphere.center);
+  //     const collisionVector = Octree._sphere.center.clone().sub(sphere.center);
 
   //     const depth = collisionVector.length();
   //     return {
@@ -291,25 +304,25 @@ export class Octree {
   // }
 
   // capsuleIntersect(capsule) {
-  //   ElpOctree._capsule.copy(capsule);
+  //   Octree._capsule.copy(capsule);
 
   //   const triangles = [];
   //   let result,
   //     hit = false;
-  //   this.getCapsuleTriangles(ElpOctree._capsule, triangles);
+  //   this.getCapsuleTriangles(Octree._capsule, triangles);
 
   //   for (let i = 0; i < triangles.length; i++) {
-  //     if ((result = this.triangleCapsuleIntersect(ElpOctree._capsule, triangles[i]))) {
+  //     if ((result = this.triangleCapsuleIntersect(Octree._capsule, triangles[i]))) {
   //       hit = true;
 
-  //       ElpOctree._capsule.translate(result.normal.multiplyScalar(result.depth));
+  //       Octree._capsule.translate(result.normal.multiplyScalar(result.depth));
   //     }
   //   }
 
   //   if (hit) {
   //     let collisionVector: Vector3;
-  //     let getCenter = ElpOctree._capsule['getCenter'] as any;
-  //     collisionVector = getCenter(new Vector3()).sub(capsule.getCenter(ElpOctree._v1));
+  //     let getCenter = Octree._capsule['getCenter'] as any;
+  //     collisionVector = getCenter(new Vector3()).sub(capsule.getCenter(Octree._v1));
 
   //     const depth = collisionVector.length();
   //     return {
@@ -330,7 +343,7 @@ export class Octree {
   //   this.getRayTriangles(ray, triangles);
 
   //   for (let i = 0; i < triangles.length; i++) {
-  //     const result = ray.intersectTriangle(triangles[i].a, triangles[i].b, triangles[i].c, true, ElpOctree._v1);
+  //     const result = ray.intersectTriangle(triangles[i].a, triangles[i].b, triangles[i].c, true, Octree._v1);
 
   //     if (result) {
   //       const newdistance = result.sub(ray.origin).length();

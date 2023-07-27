@@ -77,55 +77,47 @@ export class Sample_OctTreeRay {
         this.tree.rayCasts(ray, this.queryResult);
         let time: number = Date.now() - now;
         console.log('time: ' + time + ' count: ', this.queryResult.length);
-        // this.view.graphic3D.ClearAll();
-        // for (let i = 0; i < nodeList.length; i++) {
-        //     let node = nodeList[i];
-        //     if (node.entities.size > 0) {
-        //         this.view.graphic3D.drawBoundingBox(i.toString(), node.box, this.red);
-        //     }
-        // }
-        // this.debugNode(this.tree)
+        this.view.graphic3D.ClearAll();
 
         let retBoolean = {};
+        let boundList = {};
         for (let item of this.queryResult) {
-            retBoolean[item.uuid] = true;
+            if (ray.intersectBox(item.renderer.object3D.bound)) {
+                retBoolean[item.uuid] = true;
+                boundList[item.owner.uuid] = item.owner;
+            }
         }
         for (let item of this.entities) {
             item.renderer.enable = !retBoolean[item.uuid];
         }
+
+        //show box
+        for (let key in boundList) {
+            let tree = boundList[key];
+            this.view.graphic3D.drawBoundingBox(key, tree.box, this.gree);
+        }
     }
-
-    // private debugNode(node: Octree) {
-    //     if (node.entities.length > 0) {
-    //         this.view.graphic3D.drawBoundingBox(node.uuid, node.box, node.entities.length > 0 ? this.red : this.gree);
-    //     }
-    //     for (let item of node.subTrees) {
-    //         this.debugNode(item);
-    //     }
-    // }
-
 
     loop() {
         this.entities && this.updateBoxTransform();
     }
 
-
     private counter: number = 0;
     private updateBoxTransform() {
         this.octreeTest();
         this.counter += Time.delta;
-        // if (this.counter > 4000) {
-        //     this.counter = 0;
-        //     let obj: Object3D;
-        //     for (const entity of this.entities) {
-        //         obj = entity.renderer.object3D;
-        //         if (Math.random() < 0.1) {
-        //             obj.localPosition.set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5);
-        //             obj.localPosition.multiplyScalar(190);
-        //             obj.localPosition = obj.localPosition;
-        //             entity.update(this.tree);
-        //         }
-        //     }
-        // }
+        if (this.counter > 4000) {
+            this.counter = 0;
+            let obj: Object3D;
+            for (const entity of this.entities) {
+                obj = entity.renderer.object3D;
+                if (Math.random() < 0.1) {
+                    obj.localPosition.set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5);
+                    obj.localPosition.multiplyScalar(190);
+                    obj.localPosition = obj.localPosition;
+                    entity.update(this.tree);
+                }
+            }
+        }
     }
 }
