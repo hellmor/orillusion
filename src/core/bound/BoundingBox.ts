@@ -51,7 +51,7 @@ export class BoundingBox implements IBound {
     }
 
     public makeEmpty(): this {
-        this.setFromMinMax(BoundingBox.minVector3, BoundingBox.maxVector3);
+        this.setFromMinMax(BoundingBox.maxVector3, BoundingBox.minVector3);
         return this;
     }
 
