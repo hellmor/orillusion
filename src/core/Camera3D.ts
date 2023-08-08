@@ -220,13 +220,10 @@ export class Camera3D extends ComponentBase {
 
         let fScreenPtX = n.x;
         let fScreenPtY = n.y;
-        let m_fRadius = 1;
         target.x = fScreenPtX / this.viewPort.width - 0.25;
         target.y = fScreenPtY / this.viewPort.height - 0.25;
 
         this.unProject(target.x, target.y, n.z, target);
-        // this.transform.localMatrix.transformVector4(target, target);
-
         return target;
     }
 
@@ -376,6 +373,7 @@ export class Camera3D extends ComponentBase {
             this.getJitteredProjectionMatrix();
         }
         this.frustum.update(this.pvMatrix);
+        this.frustum.updateBoundBox(this.pvMatrixInv);
     }
 
     private _haltonSeq: HaltonSeq;

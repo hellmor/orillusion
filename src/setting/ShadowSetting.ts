@@ -66,4 +66,6 @@ export type ShadowSetting = {
      * Shadow Far Section
      */
     shadowFar: number;
+
+    cascades?: number;
 };
