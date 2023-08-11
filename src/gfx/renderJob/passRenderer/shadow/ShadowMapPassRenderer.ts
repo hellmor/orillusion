@@ -1,10 +1,8 @@
 import { Engine3D } from "../../../../Engine3D";
 import { DirectLight } from "../../../../components/lights/DirectLight";
-import { LightType } from "../../../../components/lights/LightData";
 import { RenderNode } from "../../../../components/renderer/RenderNode";
 import { Camera3D } from "../../../../core/Camera3D";
 import { View3D } from "../../../../core/View3D";
-import { clamp } from "../../../../math/MathUtil";
 import { Vector3 } from "../../../../math/Vector3";
 import { Depth2DTextureArray } from "../../../../textures/Depth2DTextureArray";
 import { VirtualTexture } from "../../../../textures/VirtualTexture";
@@ -21,32 +19,26 @@ import { RendererType } from "../state/RendererType";
 import { RendererBase } from "../RendererBase";
 import { ClusterLightingBuffer } from "../cluster/ClusterLightingBuffer";
 import { Reference } from "../../../../util/Reference";
-import { GUIHelp } from "@orillusion/debug/GUIHelp";
-import { FrustumCSM } from "../../../../core/bound/FrustumCSM";
-import { BoundingBox } from "../../../..";
+import { Texture } from "../../../graphics/webGpu/core/texture/Texture";
+import { Cascades } from "../../../../core/csm/CSM";
 
 /**
  * @internal
  * @group Post
  */
 export class ShadowMapPassRenderer extends RendererBase {
-    // public shadowCamera: Camera3D;
     public shadowPassCount: number;
     public depth2DArrayTexture: Depth2DTextureArray;
     public rendererPassStates: RendererPassState[];
     private _forceUpdate = false;
-    public csmIndex: number = 0;
-    public csm: FrustumCSM;
 
     constructor() {
         super();
+        this.setShadowMap(Engine3D.setting.shadow.shadowSize, Cascades);
         this.passType = RendererType.SHADOW;
-        this.setShadowMap(Engine3D.setting.shadow.shadowSize);
-        GUIHelp.add(this, 'csmIndex', 0, Engine3D.setting.shadow.cascades - 1, 1);
-
     }
 
-    setShadowMap(size: number) {
+    setShadowMap(size: number, cascades: number) {
         this.rendererPassStates = [];
         this.depth2DArrayTexture = new Depth2DTextureArray(size, size);
         Reference.getInstance().attached(this.depth2DArrayTexture, this);
@@ -62,94 +54,91 @@ export class ShadowMapPassRenderer extends RendererBase {
             let rendererPassState = WebGPUDescriptorCreator.createRendererPassState(rtFrame);
             this.rendererPassStates[i] = rendererPassState;
         }
-
-    }
-
-    updateCascades(camera: Camera3D, cascades: number) {
-        if (!this.csm && cascades && cascades > 1) {
-            this.csm = new FrustumCSM(cascades);
-        }
-        this.csm?.genFrustumCSM(camera.projectionMatrix, camera.pvMatrixInv, camera.near, camera.far);
     }
 
     render(view: View3D, occlusionSystem: OcclusionSystem) {
-        if (!Engine3D.setting.shadow.enable)
+        let shadowSetting = Engine3D.setting.shadow;
+        if (!shadowSetting.enable)
             return;
-
         let camera = view.camera;
         let scene = view.scene;
         this.shadowPassCount = 0;
-        this.updateCascades(camera, Engine3D.setting.shadow.cascades)
-        if (!Engine3D.setting.shadow.needUpdate)
+        if (!shadowSetting.needUpdate)
             return;
-        if (!(Time.frame % Engine3D.setting.shadow.updateFrameRate == 0))
+        if (!(Time.frame % shadowSetting.updateFrameRate == 0))
             return;
 
         camera.transform.updateWorldMatrix();
         //*********************/
         //***shadow light******/
         //*********************/
-        let shadowLight = ShadowLightsCollect.getDirectShadowLightWhichScene(scene);
-        for (let si = 0; si < shadowLight.length; si++) {
-            const light = shadowLight[si] as DirectLight;
-            if (light.lightData.lightType != LightType.DirectionLight)
-                continue;
+        let shadowLightList = ShadowLightsCollect.getDirectShadowLightWhichScene(scene);
+        let shadowSize = shadowSetting.shadowSize;
+        let cascades = Cascades;
+        for (let light of shadowLightList) {
+            const dirLight = light as DirectLight;
+            let shadowIndex = dirLight.shadowIndex;
+            this.rendererPassState = this.rendererPassStates[shadowIndex];
 
-            this.rendererPassState = this.rendererPassStates[light.shadowIndex];
-            if ((light.castShadow && light.needUpdateShadow || this._forceUpdate) || (light.castShadow && Engine3D.setting.shadow.autoUpdate)) {
-                light.needUpdateShadow = false;
-                view.graphic3D.ClearAll();
-                //
-                if (this.csm) {
-                    // for (let csmChild of this.csm.children)
-                    {
-                        let csmChild = this.csm.children[this.csmIndex];
-                        let size2 = csmChild.bound.extents.length * 2;
-                        this.poseShadowCamera(camera, light.direction, light.shadowCamera, size2, csmChild.bound.center, view);
-                        this.renderShadow(view, light.shadowCamera, occlusionSystem);
+            if ((dirLight.castShadow && dirLight.needUpdateShadow || this._forceUpdate) || (dirLight.castShadow && shadowSetting.autoUpdate)) {
+                dirLight.needUpdateShadow = false;
+
+                if (camera.enableCascades) {
+                    if (shadowIndex == 0) {
+                        for (let i = 0; i < cascades; i++) {
+                            this.rendererPassState = this.rendererPassStates[i];
+                            let csmChild = camera.csm.children[i];
+                            let size = csmChild.bound.extents.length * 2;
+                            this.poseShadowCamera(camera, dirLight.direction, csmChild.shadowCamera, size, csmChild.bound.center);
+                            this.renderShadow(view, csmChild.shadowCamera, occlusionSystem, this.rendererPassState);
+                            this.copyDepthTexture(this.rendererPassState.depthTexture, this.depth2DArrayTexture, i, shadowSize);
+                        }
+                        continue;
+                    } else {
+                        shadowIndex = shadowIndex + cascades - 1;
                     }
                 }
-                else {
-                    let size = camera.frustum.boudingBox.extents.length * 0.05;
-                    this.poseShadowCamera(camera, light.direction, light.shadowCamera, size, camera.lookTarget, view);
-                    this.renderShadow(view, light.shadowCamera, occlusionSystem);
-                }
+                let size = camera.frustum.boudingBox.extents.length * 0.05;
+                this.poseShadowCamera(camera, dirLight.direction, dirLight.shadowCamera, size, camera.lookTarget);
+                this.renderShadow(view, dirLight.shadowCamera, occlusionSystem, this.rendererPassState);
+                this.copyDepthTexture(this.rendererPassState.depthTexture, this.depth2DArrayTexture, shadowIndex, shadowSize);
             }
-
-            let qCommand = GPUContext.beginCommandEncoder();
-            qCommand.copyTextureToTexture(
-                {
-                    texture: this.rendererPassStates[light.shadowIndex].depthTexture.getGPUTexture(),
-                    mipLevel: 0,
-                    origin: { x: 0, y: 0, z: 0 },
-                },
-                {
-                    texture: this.depth2DArrayTexture.getGPUTexture(),
-                    mipLevel: 0,
-                    origin: { x: 0, y: 0, z: light.shadowIndex },
-                },
-                {
-                    width: Engine3D.setting.shadow.shadowSize,
-                    height: Engine3D.setting.shadow.shadowSize,
-                    depthOrArrayLayers: 1,
-                },
-            );
-            GPUContext.endCommandEncoder(qCommand);
         }
 
         this._forceUpdate = false;
     }
 
+    private copyDepthTexture(src: Texture, dst: Texture, dstIndex: number, shadowSize: number) {
+        let qCommand = GPUContext.beginCommandEncoder();
+        qCommand.copyTextureToTexture(
+            {
+                texture: src.getGPUTexture(),
+                mipLevel: 0,
+                origin: { x: 0, y: 0, z: 0 },
+            },
+            {
+                texture: dst.getGPUTexture(),
+                mipLevel: 0,
+                origin: { x: 0, y: 0, z: dstIndex },
+            },
+            {
+                width: shadowSize,
+                height: shadowSize,
+                depthOrArrayLayers: 1,
+            },
+        );
+        GPUContext.endCommandEncoder(qCommand);
+    }
+
     private _shadowPos: Vector3 = new Vector3();
     private _shadowCameraTarget: Vector3 = new Vector3();
 
-    private poseShadowCamera(viewCamera: Camera3D, direction: Vector3, shadowCamera: Camera3D, size: number, lookAt: Vector3, view: View3D) {
+    private poseShadowCamera(viewCamera: Camera3D, direction: Vector3, shadowCamera: Camera3D, size: number, lookAt: Vector3) {
         this._shadowPos.copy(direction).normalize(viewCamera.far);
         lookAt.add(this._shadowPos, this._shadowCameraTarget);
         lookAt.subtract(this._shadowPos, this._shadowPos);
         shadowCamera.transform.lookAt(this._shadowPos, this._shadowCameraTarget);
         shadowCamera.orthoOffCenter(-size, size, -size, size, viewCamera.near, viewCamera.far * 2);
-        // view.graphic3D.drawBoundingBox(shadowCamera.name, bound, color);
     }
 
 
@@ -157,16 +146,16 @@ export class ShadowMapPassRenderer extends RendererBase {
 
     }
 
-    private renderShadow(view: View3D, shadowCamera: Camera3D, occlusionSystem: OcclusionSystem) {
+    private renderShadow(view: View3D, shadowCamera: Camera3D, occlusionSystem: OcclusionSystem, state: RendererPassState) {
         let collectInfo = EntityCollect.instance.getRenderNodes(view.scene);
         let command = GPUContext.beginCommandEncoder();
-        let encoder = GPUContext.beginRenderPass(command, this.rendererPassState);
+        let encoder = GPUContext.beginRenderPass(command, state);
 
         shadowCamera.transform.updateWorldMatrix();
         occlusionSystem.update(shadowCamera, view.scene);
         GPUContext.bindCamera(encoder, shadowCamera);
-        let op_bundleList = this.renderShadowBundleOp(view, shadowCamera);
-        let tr_bundleList = this.renderShadowBundleTr(view, shadowCamera);
+        let op_bundleList = this.renderShadowBundleOp(view, shadowCamera, state);
+        let tr_bundleList = this.renderShadowBundleTr(view, shadowCamera, state);
 
         if (op_bundleList.length > 0) {
             encoder.executeBundles(op_bundleList);
@@ -181,7 +170,7 @@ export class ShadowMapPassRenderer extends RendererBase {
         GPUContext.endCommandEncoder(command);
     }
 
-    protected renderShadowBundleOp(view: View3D, shadowCamera: Camera3D) {
+    protected renderShadowBundleOp(view: View3D, shadowCamera: Camera3D, state: RendererPassState) {
         let entityBatchCollect = EntityCollect.instance.getOpRenderGroup(view.scene);
         if (entityBatchCollect) {
             let bundlerList = [];
@@ -189,7 +178,7 @@ export class ShadowMapPassRenderer extends RendererBase {
                 if (v.bundleMap.has(this._rendererType)) {
                     bundlerList.push(v.bundleMap.get(this._rendererType));
                 } else {
-                    let renderBundleEncoder = GPUContext.recordBundleEncoder(this.rendererPassState.renderBundleEncoderDescriptor);
+                    let renderBundleEncoder = GPUContext.recordBundleEncoder(state.renderBundleEncoderDescriptor);
                     this.recordShadowRenderBundleNode(view, shadowCamera, renderBundleEncoder, v.renderNodes);
                     let newBundle = renderBundleEncoder.finish();
                     v.bundleMap.set(this._rendererType, newBundle);
@@ -201,7 +190,7 @@ export class ShadowMapPassRenderer extends RendererBase {
         return [];
     }
 
-    protected renderShadowBundleTr(view: View3D, shadowCamera: Camera3D) {
+    protected renderShadowBundleTr(view: View3D, shadowCamera: Camera3D, state: RendererPassState) {
         let entityBatchCollect = EntityCollect.instance.getTrRenderGroup(view.scene);
         if (entityBatchCollect) {
             let bundlerList = [];
@@ -209,7 +198,7 @@ export class ShadowMapPassRenderer extends RendererBase {
                 if (v.bundleMap.has(this._rendererType)) {
                     bundlerList.push(v.bundleMap.get(this._rendererType));
                 } else {
-                    let renderBundleEncoder = GPUContext.recordBundleEncoder(this.rendererPassState.renderBundleEncoderDescriptor);
+                    let renderBundleEncoder = GPUContext.recordBundleEncoder(state.renderBundleEncoderDescriptor);
                     this.recordShadowRenderBundleNode(view, shadowCamera, renderBundleEncoder, v.renderNodes);
                     let newBundle = renderBundleEncoder.finish();
                     v.bundleMap.set(this._rendererType, newBundle);

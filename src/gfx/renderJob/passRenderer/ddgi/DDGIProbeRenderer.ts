@@ -231,9 +231,9 @@ export class DDGIProbeRenderer extends RendererBase {
 
         if (EntityCollect.instance.state.giLightingChange || probeBeRendered || Engine3D.setting.gi.realTimeGI) {
             EntityCollect.instance.state.giLightingChange = false;
-            this.lightingPass.computer(view, this.rendererPassState);
-            this.bouncePass.computer(view, this.rendererPassState);
-            this.irradianceComputePass.computer(view, this.rendererPassState);
+            this.lightingPass.compute(view, this.rendererPassState);
+            this.bouncePass.compute(view, this.rendererPassState);
+            this.irradianceComputePass.compute(view, this.rendererPassState);
         }
 
         if (this.probeRenderResult.complete) {

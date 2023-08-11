@@ -1,5 +1,6 @@
 import { Engine3D } from "../../../../../Engine3D";
 import { Camera3D } from "../../../../../core/Camera3D";
+import { Cascades } from "../../../../../core/csm/CSM";
 import { Matrix4 } from "../../../../../math/Matrix4";
 import { UUID } from "../../../../../util/Global";
 import { Time } from "../../../../../util/Time";
@@ -8,7 +9,6 @@ import { webGPUContext } from "../../Context3D";
 import { UniformGPUBuffer } from "../buffer/UniformGPUBuffer";
 import { GlobalBindGroupLayout } from "./GlobalBindGroupLayout";
 import { MatrixBindGroup } from "./MatrixBindGroup";
-
 
 /**
  * @internal
@@ -31,7 +31,7 @@ export class GlobalUniformGroup {
     constructor(matrixBindGroup: MatrixBindGroup) {
         this.uuid = UUID();
         this.usage = GPUBufferUsage.UNIFORM | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST;
-        this.uniformGPUBuffer = new UniformGPUBuffer(32 * 4 * 4 + (3 * 4 * 4) + 8 * 16);
+        this.uniformGPUBuffer = new UniformGPUBuffer(32 * 4 * 4 + (3 * 4 * 4) + 8 * 16 + Cascades * 16);
         this.uniformGPUBuffer.visibility = GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE
         this.matrixBindGroup = matrixBindGroup;
 
@@ -73,25 +73,38 @@ export class GlobalUniformGroup {
     //     }
     // }
 
+    private shadowMatrixRaw = new Float32Array(8 * 16);
+    private csmMatrixRaw = new Float32Array(Cascades * 16);
     public setCamera(camera: Camera3D) {
         camera.transform.updateWorldMatrix(true);
         this.uniformGPUBuffer.setMatrix(`_projectionMatrix`, camera.projectionMatrix);
         this.uniformGPUBuffer.setMatrix(`_viewMatrix`, camera.viewMatrix);
         this.uniformGPUBuffer.setMatrix(`_cameraWorldMatrix`, camera.transform.worldMatrix);
         this.uniformGPUBuffer.setMatrix(`_projectionMatrixInv`, camera.projectionMatrixInv);
-        let raw = new Float32Array(8 * 16);
+
+        let shadowLightList = ShadowLightsCollect.getDirectShadowLightWhichScene(camera.transform.scene3D);
+
+        this.shadowMatrixRaw.fill(0);
         for (let i = 0; i < 8; i++) {
-            let shadowLightList = ShadowLightsCollect.getDirectShadowLightWhichScene(camera.transform.scene3D);
             if (i < shadowLightList.length) {
-                let mat = shadowLightList[i].shadowCamera.pvMatrix.rawData;
-                raw.set(mat, i * 16);
+                let shadowCamera = shadowLightList[i].shadowCamera;
+                this.shadowMatrixRaw.set(shadowCamera.pvMatrix.rawData, i * 16);
             } else {
-                raw.set(camera.transform.worldMatrix.rawData, i * 16);
+                this.shadowMatrixRaw.set(camera.transform.worldMatrix.rawData, i * 16);
             }
         }
-        this.uniformGPUBuffer.setFloat32Array(`_shadowCamera`, raw);
-        this.uniformGPUBuffer.setVector3(`CameraPos`, camera.transform.worldPosition);
+        this.uniformGPUBuffer.setFloat32Array(`shadowMatrix`, this.shadowMatrixRaw);
 
+        this.csmMatrixRaw.fill(0);
+        if (Cascades > 1 && camera.enableCascades && shadowLightList[0]) {
+            for (let i = 0; i < Cascades; i++) {
+                let shadowCamera: Camera3D = camera.csm.children[i].shadowCamera;
+                this.csmMatrixRaw.set(shadowCamera.pvMatrix.rawData, i * 16);
+            }
+        }
+        this.uniformGPUBuffer.setFloat32Array(`csmMatrix`, this.csmMatrixRaw);
+
+        this.uniformGPUBuffer.setVector3(`CameraPos`, camera.transform.worldPosition);
         this.uniformGPUBuffer.setFloat(`Time.frame`, Time.frame);
         this.uniformGPUBuffer.setFloat(`Time.time`, Time.frame);
         this.uniformGPUBuffer.setFloat(`Time.detail`, Time.delta);
@@ -117,6 +130,7 @@ export class GlobalUniformGroup {
         this.uniformGPUBuffer.setFloat(`EngineSetting.Shadow.pointShadowBias`, Engine3D.setting.shadow.pointShadowBias);
         this.uniformGPUBuffer.setFloat(`shadowMapSize`, Engine3D.setting.shadow.shadowSize);
         this.uniformGPUBuffer.setFloat(`shadowSoft`, Engine3D.setting.shadow.shadowSoft);
+        this.uniformGPUBuffer.setFloat(`enableCascades`, camera.enableCascades ? 1 : 0);
         this.uniformGPUBuffer.apply();
     }
 

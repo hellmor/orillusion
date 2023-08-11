@@ -9,12 +9,11 @@ class Sample_CSM {
     light: DirectLight;
     boxRenderer: MeshRenderer;
     viewCamera: Camera3D;
-    shadowRenderer: ShadowMapPassRenderer;
     async run() {
         Engine3D.setting.shadow.autoUpdate = true;
         Engine3D.setting.shadow.shadowBias = 0.0001;
         Engine3D.setting.shadow.shadowBound = 100;
-        Engine3D.setting.shadow.cascades = 3;
+        Engine3D.setting.shadow.shadowSize = 2048;
         await Engine3D.init({ renderLoop: () => { this.loop(); } });
 
         GUIHelp.init();
@@ -36,10 +35,11 @@ class Sample_CSM {
         view.scene = this.scene;
         view.camera = mainCamera;
         this.view = view;
-
         this.viewCamera = mainCamera;
 
-        this.shadowRenderer = Engine3D.startRenderView(view).shadowMapPassRenderer;
+        GUIHelp.add(Engine3D.setting.shadow, 'shadowBias', 0.000001, 0.01, 0.000001);
+        mainCamera.setupCascades(true, true);
+        Engine3D.startRenderView(view);
     }
 
     // create direction light
@@ -79,12 +79,15 @@ class Sample_CSM {
             this.scene.addChild(floor);
         }
 
-        for (let i = 0; i < 100; i++) {
+        for (let i = 0; i < 1000; i++) {
             let item = Object3DUtil.GetSingleSphere(4, 0.6, 0.4, 0.2);
             let angle = Math.PI * 4 * i / 50;
-            item.x = Math.sin(angle) * (50 + i);
-            item.z = Math.cos(angle) * (50 + i);
+            item.x = Math.sin(angle) * (50 + i ** 1.4);
+            item.z = Math.cos(angle) * (50 + i ** 1.4);
             item.y = 4;
+            let scale = ((i ** 1.4) * 5 + 1000) / 1000;
+            item.scaleX = item.scaleZ = scale;
+            item.scaleY = scale * 5;
             this.scene.addChild(item);
         }
     }
@@ -101,21 +104,20 @@ class Sample_CSM {
         let renderer = box.addComponent(MeshRenderer);
         renderer.material = material;
         renderer.geometry = geom;
-        this.scene.addChild(box);
+        // this.scene.addChild(box);
         this.boxRenderer = renderer;
     }
 
     private _shadowPos: Vector3 = new Vector3();
     private _shadowCameraTarget: Vector3 = new Vector3();
     loop() {
-
         let viewCamera = this.viewCamera;
         let light = this.light;
         let view = this.view;
-        if (!this.boxRenderer || !this.shadowRenderer.csm)
+        if (!this.boxRenderer || !this.viewCamera.csm)
             return;
 
-        let csmBound = this.shadowRenderer.csm.children[this.shadowRenderer.csmIndex].bound;
+        let csmBound = this.viewCamera.csm.children[0].bound;
 
         //update box
         let size = csmBound.extents.length * 2;

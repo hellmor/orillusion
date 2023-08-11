@@ -151,10 +151,18 @@ export let BxDF_frag: string = /*wgsl*/ `
       color += fragData.EnvColor * fragData.Ao ;
       color += fragData.Emissive.xyz ;
 
+    if(csmLevel == 0){
+        color += vec3<f32>(0.2, 0.0, 0.0);
+    }else if(csmLevel == 1){
+        color += vec3<f32>(0.0, 0.2, 0.0);
+    }else if(csmLevel == 2){
+        color += vec3<f32>(0.0, 0.0, 0.2);
+    }else if(csmLevel == 3){
+        color += vec3<f32>(0.0, 0.1, 0.1);
+    }
       //-1 1
       // color = diffuseIBL ;
       ORI_FragmentOutput.color = vec4<f32>(color.rgb,fragData.Albedo.a) ;
-
       // let gamma = 2.0 ;
       // ORI_FragmentOutput.color = pow(ORI_FragmentOutput.color,vec4(gamma,gamma,gamma,1.0));
   }

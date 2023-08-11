@@ -152,6 +152,7 @@ export class ShadowLightsCollect {
     }
 
     public static removeShadowLight(light: ILight) {
+        light.lightData.castShadowIndex = -1;
         if (!light.transform.view3D) return null;
         if (light.lightData.lightType == LightType.DirectionLight) {
             let list = this.directionLightList.get(light.transform.view3D.scene);

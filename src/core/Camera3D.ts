@@ -1,7 +1,7 @@
 import { ComponentBase } from '../components/ComponentBase';
 import { Engine3D } from '../Engine3D';
 import { HaltonSeq } from '../math/HaltonSeq';
-import { MathUtil } from '../math/MathUtil';
+import { MathUtil, clamp } from '../math/MathUtil';
 import { Matrix4, matrixMultiply } from '../math/Matrix4';
 import { Ray } from '../math/Ray';
 import { Rect } from '../math/Rect';
@@ -12,6 +12,9 @@ import { Frustum } from './bound/Frustum';
 import { CameraType } from './CameraType';
 import { CubeCamera } from './CubeCamera';
 import { webGPUContext } from '../gfx/graphics/webGpu/Context3D';
+import { FrustumCSM } from './csm/FrustumCSM';
+import { GUIHelp } from '@orillusion/debug/GUIHelp';
+import { Cascades } from './csm/CSM';
 
 /**
  * Camera components
@@ -94,7 +97,8 @@ export class Camera3D extends ComponentBase {
      */
     public cubeShadowCameras: CubeCamera[] = [];
 
-
+    public csm: FrustumCSM;
+    public enableCascades: boolean;
     constructor() {
         super();
     }
@@ -109,6 +113,15 @@ export class Camera3D extends ComponentBase {
         this.viewPort.w = webGPUContext.presentationSize[0];
         this.viewPort.h = webGPUContext.presentationSize[1];
         this.lookTarget = new Vector3(0, 0, 0);
+    }
+
+    public setupCascades(enable: boolean, debugCsm: boolean = false) {
+        this.enableCascades = enable;
+        this.csm = new FrustumCSM(Cascades);
+
+        if (debugCsm) {
+            GUIHelp.add(this, 'enableCascades');
+        }
     }
 
     /**
@@ -244,9 +257,9 @@ export class Camera3D extends ComponentBase {
      * get (project * view) invert matrix
      */
     public get pvMatrixInv(): Matrix4 {
-        let pvMatrixInv = this._pvMatrixInv.copyFrom(this.pvMatrix);
-        pvMatrixInv.invert();
-        return pvMatrixInv;
+        let matrix = this._pvMatrixInv.copyFrom(this.pvMatrix);
+        matrix.invert();
+        return matrix;
     }
 
     /**
@@ -374,6 +387,7 @@ export class Camera3D extends ComponentBase {
         }
         this.frustum.update(this.pvMatrix);
         this.frustum.updateBoundBox(this.pvMatrixInv);
+        this.enableCascades && this.csm?.update(this._projectionMatrix, this._pvMatrixInv, this.near, this.far);
     }
 
     private _haltonSeq: HaltonSeq;

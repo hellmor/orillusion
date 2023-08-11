@@ -3,7 +3,7 @@ import { Matrix4 } from "../../math/Matrix4";
 import { Vector3 } from "../../math/Vector3";
 import { CameraUtil } from "../../util/CameraUtil";
 import { Camera3D } from "../Camera3D";
-import { BoundingBox } from "./BoundingBox";
+import { BoundingBox } from "../bound/BoundingBox";
 
 class FrustumSection {
     public corners: Vector3[];
@@ -73,7 +73,7 @@ export class FrustumCSM {
     public sections: FrustumSection[];
     public children: FrustumChild[];
     public name: string;
-    constructor(blockCount: number = 4) {
+    constructor(blockCount: number) {
         this.sections = [];
         let sectionCount = blockCount + 1;
         for (let i = 0; i < sectionCount; i++) {
@@ -86,13 +86,13 @@ export class FrustumCSM {
         }
     }
 
-    genFrustumCSM(p: Matrix4, pvInv: Matrix4, near: number, far: number): this {
+    update(p: Matrix4, pvInv: Matrix4, near: number, far: number): this {
         let blockCount = this.sections.length - 1;
         for (let z = 0; z <= blockCount; ++z) {
             let section = this.sections[z];
             let cornerIndex = 0;
             let worldZ = this.logSplit(near, far, z, this.sections.length);
-
+            // let worldZ = this.squareSplit(near, far, z, this.sections.length);
             // let depth = (worldZ - near) * far / (far - near);
             // depth /= worldZ;
 
@@ -114,9 +114,9 @@ export class FrustumCSM {
         return this;
     }
 
-    private squareSprite(near: number, far: number, index: number, max: number): number {
+    private squareSplit(near: number, far: number, index: number, max: number): number {
         let ratio = index / (max - 1);
-        return ratio * ratio * (far - near) + near;
+        return (ratio ** 4) * (far - near) + near;
     }
 
     private uniformSplit(near: number, far: number, index: number, max: number): number {
