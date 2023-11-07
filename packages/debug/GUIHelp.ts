@@ -49,10 +49,13 @@ class _GUIHelp {
         return dgui.add(a, b, c, d, e);
     }
 
-    addLabel(label: string) {
+    addLabel(label: string, key?: string) {
         if (!this.debug)
             return this._nullBind;
-        GUIHelp.add({ label: label }, 'label');
+        key ||= 'label';
+        let obj = {};
+        obj[key] = label;
+        GUIHelp.add(obj, key);
     }
 
     addInfo(label: string, value: any) {
