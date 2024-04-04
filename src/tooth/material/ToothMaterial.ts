@@ -1,4 +1,4 @@
-import { LambertMaterial, RenderShaderPass, PassType, Vector4, Color, Shader, Engine3D, Plane3D, ShaderLib, Tooth_Shader, ToothMaterialUniform_frag } from "../..";
+import { LambertMaterial, RenderShaderPass, PassType, Vector4, Color, Engine3D, Plane3D, ShaderLib, Shader, ToothMaterialUniform_frag, Tooth_Shader, Slice_Shader } from "../..";
 
 export enum ToothClipTag {
     None = 0,
@@ -18,12 +18,14 @@ export class ToothMaterial extends LambertMaterial {
     private _clipPlanesData: Float32Array;
     private _backFaceColor: Color;
     private readonly PlaneCount = 4;
-    constructor() {
+    constructor(slice?: boolean) {
         super();
         ShaderLib.register('Tooth_Shader', Tooth_Shader);
+        ShaderLib.register('Slice_Shader', Slice_Shader);
         ShaderLib.register('ToothMaterialUniform_frag', ToothMaterialUniform_frag);
 
-        let colorPass = new RenderShaderPass(`Tooth_Shader`, `Tooth_Shader`);
+        let toothShader = slice ? 'Slice_Shader' : 'Tooth_Shader';
+        let colorPass = new RenderShaderPass(toothShader, toothShader);
         colorPass.setShaderEntry(`VertMain`, `FragMain`);
         colorPass.passType = PassType.COLOR;
         colorPass.setUniformVector4(`transformUV1`, new Vector4(0, 0, 1, 1));
