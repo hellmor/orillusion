@@ -5,6 +5,8 @@ export let ToothMaterialUniform_frag = /* wgsl */`
   struct MaterialUniform {
     transformUV1:vec4<f32>,
     transformUV2:vec4<f32>,
+    selectPlane: vec4<f32>,
+    selectPlaneColor: vec4<f32>,
     baseColor: vec4<f32>,
     backFaceColor: vec4<f32>,
     enableClipTags: vec4<f32>,

@@ -33,6 +33,14 @@ export let Tooth_Shader: string = /*wgsl*/ `
         return false;
     }
 
+    fn isAtPlane(plane:vec4<f32>) -> bool{
+        let pos = ORI_VertexVarying.vWorldPos.xyz;
+        let normal = ORI_VertexVarying.vWorldNormal.xyz;
+        let dotValue1 = dot( plane.xyz, pos );
+        let dotValue2 = dot(plane.xyz, normal);
+        return abs(dotValue1 - plane.w) < 0.5 && dotValue2 > 0.95;
+    }
+
     fn frag(){
         var transformUV1 = materialUniform.transformUV1;
         var transformUV2 = materialUniform.transformUV2;
@@ -73,8 +81,14 @@ export let Tooth_Shader: string = /*wgsl*/ `
             }
           }
         }
-        
+
         var useBaseColor = materialUniform.baseColor;
+
+        let selectPlane = materialUniform.selectPlane;
+        let isAtPlaneBool = length(selectPlane.xyz) > 0.1 && isAtPlane(selectPlane);
+        if(isAtPlaneBool){
+            useBaseColor = materialUniform.selectPlaneColor;
+        }
         if(!ORI_VertexVarying.face){
             useBaseColor = materialUniform.backFaceColor;
         }

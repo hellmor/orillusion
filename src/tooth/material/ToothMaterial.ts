@@ -16,7 +16,9 @@ export class ToothMaterial extends LambertMaterial {
     private _colorPass: RenderShaderPass;
     private _enableClipTags: Float32Array;
     private _clipPlanesData: Float32Array;
-    private _backFaceColor: Color;
+    private _backFaceColor: Color = new Color(0.8, 0.2, 0.2, 1.0);
+    private _selectPlaneColor: Color = new Color(1, 1, 0.2, 1.0);
+    private _selectPlane: Vector4 = new Vector4();
     private readonly PlaneCount = 4;
     constructor(slice?: boolean) {
         super();
@@ -30,8 +32,9 @@ export class ToothMaterial extends LambertMaterial {
         colorPass.passType = PassType.COLOR;
         colorPass.setUniformVector4(`transformUV1`, new Vector4(0, 0, 1, 1));
         colorPass.setUniformVector4(`transformUV2`, new Vector4(0, 0, 1, 1));
+        colorPass.setUniformVector4(`selectPlane`, this._selectPlane);
+        colorPass.setUniformColor(`selectPlaneColor`, this._selectPlaneColor);
         colorPass.setUniformColor(`baseColor`, new Color(1, 1, 1, 1));
-        this._backFaceColor = new Color(0.8, 0.2, 0.2, 1.0);
         colorPass.setUniformColor(`backFaceColor`, this._backFaceColor);
 
         let shaderState = colorPass.shaderState;
@@ -62,6 +65,14 @@ export class ToothMaterial extends LambertMaterial {
 
         this._clipPlanesData = new Float32Array([0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0]);
         this._colorPass.setUniformArray('clipPlanesData', this._clipPlanesData);
+    }
+
+    public setSelectPlane(plane: Plane3D): this {
+        if (!plane) this._selectPlane.set(0, 0, 0, 0);
+        else this._selectPlane.set(plane.a, plane.b, plane.c, plane.d);
+
+        this._colorPass.setUniformVector4('selectPlane', this._selectPlane);
+        return this;
     }
 
     public setClipEnable(index: number, value: ToothClipTag) {
@@ -108,5 +119,15 @@ export class ToothMaterial extends LambertMaterial {
     public set backFaceColor(value: Color) {
         this._backFaceColor.copyFrom(value);
         this._colorPass.setUniformColor(`backFaceColor`, this._backFaceColor);
+    }
+
+
+    public get selectPlaneColor() {
+        return this._selectPlaneColor;
+    }
+
+    public set selectPlaneColor(value: Color) {
+        this._selectPlaneColor.copyFrom(value);
+        this._colorPass.setUniformColor(`selectPlaneColor`, this._selectPlaneColor);
     }
 }
