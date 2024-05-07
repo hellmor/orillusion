@@ -2,7 +2,6 @@ import {
     Engine3D, View3D, Scene3D, CameraUtil, AtmosphericComponent, webGPUContext,
     HoverCameraController, Object3D, DirectLight, KelvinUtil,
     MeshRenderer,
-    ToothMaterial,
     Object3DUtil,
     BoxGeometry,
     Plane3D,
@@ -16,6 +15,10 @@ import {
     ComponentBase,
     Time,
     clamp,
+    Res,
+    GeometryBase,
+    CCLQueryPost,
+    LitMaterial,
 } from "@orillusion/core";
 
 import { GUIHelp } from "@orillusion/debug/GUIHelp";
@@ -88,9 +91,9 @@ class SetPlaneAnimation extends ComponentBase {
 class Sample_SetPlane {
     view: View3D;
     scene: Scene3D;
-    srcMaterial: ToothMaterial;
     private plane = new Plane3D();
     private isBottomPlane: boolean = true;
+    private cclPost: CCLQueryPost;
     async run() {
         GUIHelp.init();
 
@@ -108,7 +111,7 @@ class Sample_SetPlane {
         let mainCamera = CameraUtil.createCamera3DObject(this.scene, 'camera');
         mainCamera.perspective(60, webGPUContext.aspect, 1, 5000.0);
         let ctrl = mainCamera.object3D.addComponent(HoverCameraController);
-        ctrl.setCamera(30, -15, 100);
+        ctrl.setCamera(30, -15, 10);
 
         this.initScene();
         sky.relativeTransform = this.lightObj.transform;
@@ -119,26 +122,28 @@ class Sample_SetPlane {
         Engine3D.startRenderView(this.view);
 
         let postProcessing = this.scene.getOrAddComponent(PostProcessingComponent);
-        let bloomPost = postProcessing.addPost(GTAOPost);
+        this.cclPost = postProcessing.addPost(CCLQueryPost);
 
-        let model = this.initToothModel();
+        let car = await Engine3D.res.loadGltf('gltfs/glb/PotionBottle.glb');
+
+        let geometry = car.getComponents(MeshRenderer)[0].geometry;
+        let model = this.initToothModel(geometry);
         this.scene.addChild(model);
 
         this.registerEvents();
     }
 
-    private initToothModel() {
-        this.srcMaterial = new ToothMaterial();
+    private initToothModel(geometry: GeometryBase) {
         let cube = new Object3D();
 
         let meshRenderer = cube.addComponent(MeshRenderer);
         cube.addComponent(ColliderComponent);
 
-        meshRenderer.geometry = new BoxGeometry(30, 20, 15);
-        meshRenderer.material = this.srcMaterial;
+        meshRenderer.geometry = geometry;
+        meshRenderer.material = new LitMaterial();
 
 
-        GUIUtil.RenderColor(this.srcMaterial, 'selectPlaneColor');
+        // GUIUtil.RenderColor(this.srcMaterial, 'selectPlaneColor');
         GUIHelp.add(this, 'isBottomPlane');
 
         return cube;
@@ -161,20 +166,23 @@ class Sample_SetPlane {
 
             let component = obj.addComponent(SetPlaneAnimation);
             component.playAnimation(worldPos, worldNormal, 300, this.isBottomPlane);
-            this.srcMaterial.setSelectPlane(null);
+            this.cclPost.setPickData(null);
         }
     }
 
     private onMouseMove(e: PointerEvent3D) {
         let obj = e.data.pick?.object3D;
-        if (obj == null) return;
+        if (obj == null) {
+            this.cclPost.setPickData(null, -1);
+            return;
+        };
         let animation = obj.getComponent(SetPlaneAnimation);
         if (!animation) {
             let info = e.data.pickInfo;
-            let { worldPos, worldNormal } = info;
+            let { worldPos, worldNormal, meshID } = info;
             this.plane.fromNormalAndPoint(worldNormal, worldPos);
             this.plane.d *= -1;
-            this.srcMaterial.setSelectPlane(this.plane);
+            this.cclPost.setPickData(this.plane, meshID);
         }
     }
 
@@ -193,7 +201,7 @@ class Sample_SetPlane {
         this.scene.addChild(this.lightObj);
         GUIUtil.renderDirLight(lc, false);
 
-        this.scene.addChild(Object3DUtil.GetSingleCube(100, 0.1, 100, 0.2, 0.2, 0.2))
+        this.scene.addChild(Object3DUtil.GetSingleCube(400, 0.1, 400, 0.2, 0.2, 0.2))
     }
 
     loop() {
