@@ -2,10 +2,14 @@ export let CCL_Partition: string = /*wgsl*/ `
 
     struct CCLUniformStruct{
       plane:vec4<f32>,
+      coordX:f32,
+      coordY:f32,
       meshID:f32,
       imageWidth:f32,
       imageHeight:f32,
+      gridCount:f32,
       slot0:f32,
+      slot1:f32,
     } 
 
     @group(0) @binding(0) var<uniform> cclUniformData: CCLUniformStruct;
@@ -14,11 +18,13 @@ export let CCL_Partition: string = /*wgsl*/ `
     var<private> texSize: vec2<u32>;
     var<private> texSizeI32: vec2<i32>;
     var<private> fragCoord: vec2<i32>;
+    var<private> gridCount: i32;
     
     @compute @workgroup_size( 8 , 8 , 1 )
     fn CsMain( @builtin(workgroup_id) workgroup_id : vec3<u32> , @builtin(global_invocation_id) globalInvocation_id : vec3<u32>)
     {
-      fragCoord = vec2<i32>( globalInvocation_id.xy ) * 3;
+      gridCount = i32(cclUniformData.gridCount);
+      fragCoord = vec2<i32>( globalInvocation_id.xy ) * gridCount;
       texSize = vec2<u32>(u32(cclUniformData.imageWidth), u32(cclUniformData.imageHeight));
       texSizeI32 = vec2<i32>( texSize );
       if(fragCoord.x >= i32(texSize.x) || fragCoord.y >= i32(texSize.y)){
@@ -37,8 +43,8 @@ export let CCL_Partition: string = /*wgsl*/ `
       var retCount = 0u;
       var tempIndex:i32 = 0;
       var coord:vec2<i32>;
-      for(var y:i32 = 0; y < 3; y ++){
-        for(var x:i32 = 0; x < 3; x ++){
+      for(var y:i32 = 0; y < gridCount; y ++){
+        for(var x:i32 = 0; x < gridCount; x ++){
           coord.x = fragCoord.x + x;
           coord.y = fragCoord.y + y;
           tempIndex = getIndex(coord.x, coord.y);
@@ -73,13 +79,13 @@ export let CCL_Partition: string = /*wgsl*/ `
       if(lcX > 0){
         indexVec4.x = getIndex(coord.x - 1, coord.y);//left
       }
-      if(lcX < 2){
+      if(lcX < gridCount - 1){
         indexVec4.y = getIndex(coord.x + 1, coord.y);//right
       }
       if(lcY > 0){
         indexVec4.z = getIndex(coord.x, coord.y - 1);//top
       }
-      if(lcY < 2){
+      if(lcY < gridCount - 1){
         indexVec4.w = getIndex(coord.x, coord.y + 1);//bottom
       }
 

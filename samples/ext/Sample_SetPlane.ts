@@ -179,10 +179,10 @@ class Sample_SetPlane {
         let animation = obj.getComponent(SetPlaneAnimation);
         if (!animation) {
             let info = e.data.pickInfo;
-            let { worldPos, worldNormal, meshID } = info;
+            let { worldPos, worldNormal, meshID, coord } = info;
             this.plane.fromNormalAndPoint(worldNormal, worldPos);
             this.plane.d *= -1;
-            this.cclPost.setPickData(this.plane, meshID);
+            this.cclPost.setPickData(this.plane, coord.x, coord.y, meshID);
         }
     }
 

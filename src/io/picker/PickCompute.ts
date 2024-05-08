@@ -82,4 +82,12 @@ export class PickCompute {
         target.set(x, y);
         return target;
     }
+
+    public getPickCoord(target?: Vector2): Vector2 {
+        target ||= new Vector2();
+        var x = this._outBuffer.outFloat32Array[16];
+        var y = this._outBuffer.outFloat32Array[17];
+        target.set(x, y);
+        return target;
+    }
 }

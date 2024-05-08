@@ -2,10 +2,14 @@ export let CCL_Index: string = /*wgsl*/ `
 
     struct CCLUniformStruct{
       plane:vec4<f32>,
+      coordX:f32,
+      coordY:f32,
       meshID:f32,
       imageWidth:f32,
       imageHeight:f32,
+      gridCount:f32,
       slot0:f32,
+      slot1:f32,
     } 
 
     @group(0) @binding(0) var<uniform> cclUniformData: CCLUniformStruct;

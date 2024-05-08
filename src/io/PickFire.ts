@@ -141,6 +141,7 @@ export class PickFire extends CEventDispatcher {
             screenUv: this._pickCompute.getPickScreenUV(),
             meshID: this._pickCompute.getPickMeshID(),
             worldNormal: this._pickCompute.getPickWorldNormal(),
+            coord: this._pickCompute.getPickCoord()
         };
     }
 
