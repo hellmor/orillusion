@@ -8,8 +8,8 @@ export let CCL_BorderLinkClear: string = /*wgsl*/ `
       imageWidth:f32,
       imageHeight:f32,
       gridCount:f32,
+      activePost:f32,
       slot0:f32,
-      slot1:f32,
     } 
 
     @group(0) @binding(0) var<uniform> cclUniformData: CCLUniformStruct;

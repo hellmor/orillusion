@@ -8,8 +8,8 @@ export let CCL_Blend: string = /*wgsl*/ `
       imageWidth:f32,
       imageHeight:f32,
       gridCount:f32,
+      activePost:f32,
       slot0:f32,
-      slot1:f32,
     } 
 
     @group(0) @binding(0) var<uniform> cclUniformData: CCLUniformStruct;
@@ -27,21 +27,21 @@ export let CCL_Blend: string = /*wgsl*/ `
     {
       fragCoord = vec2<i32>( globalInvocation_id.xy );
       texSize = vec2<u32>(u32(cclUniformData.imageWidth), u32(cclUniformData.imageHeight));
-      let a = labelRedirectBuffer[0];
       if(fragCoord.x >= i32(texSize.x) || fragCoord.y >= i32(texSize.y)){
           return;
       }
       wColor = textureLoad(colorTex, fragCoord, 0);
-      let index = fragCoord.x + fragCoord.y * i32(texSize.x);
-
-      let pickCoordX = i32(round(cclUniformData.coordX));
-      let pickCoordY = i32(round(cclUniformData.coordY));
-      var pIndex = pickCoordX + pickCoordY * i32(texSize.x);
-
-      if(isLinked(pIndex, index)){
-        wColor.x = 0.5;
-        wColor.y = 0.1;
-        wColor.z = 0.1;
+      
+      if(cclUniformData.activePost > 0.5){
+        let index = fragCoord.x + fragCoord.y * i32(texSize.x);
+        let pickCoordX = i32(round(cclUniformData.coordX));
+        let pickCoordY = i32(round(cclUniformData.coordY));
+        var pIndex = pickCoordX + pickCoordY * i32(texSize.x);
+        if(isLinked(pIndex, index)){
+          wColor.x = 0.5;
+          wColor.y = 0.1;
+          wColor.z = 0.1;
+        }
       }
       textureStore(outTex, fragCoord , wColor);
     }

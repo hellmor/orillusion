@@ -39,6 +39,14 @@ export class CCLQueryPost extends PostBase {
 
     private readonly GridCount = 64;
 
+    private _activePost: boolean = true;
+    public get activePost(): boolean {
+        return this._activePost;
+    }
+    public set activePost(value: boolean) {
+        this._activePost = value;
+    }
+
     /**
      * @internal
      */
@@ -66,6 +74,7 @@ export class CCLQueryPost extends PostBase {
         this.cclUniformArray[7] = w;
         this.cclUniformArray[8] = h;
         this.cclUniformArray[9] = this.GridCount;
+        this.cclUniformArray[10] = this.activePost ? 1 : 0;
 
         this.cclUniformData.setFloat32Array('data', this.cclUniformArray);
         return this;
@@ -74,7 +83,6 @@ export class CCLQueryPost extends PostBase {
     private createCompute() {
         let rtFrame = GBufferFrame.getGBufferFrame("ColorPassGBuffer");
         this.cclUniformData = new UniformGPUBuffer(12);
-        this.setPickData(null);
         this.cclBuffer = new StorageGPUBuffer(this.outputTexture.width * this.outputTexture.height);
         this.borderLinkBuffer = new StorageGPUBuffer(this.outputTexture.width * this.outputTexture.height * 2);
         this.redrectLinkBuffer = new StorageGPUBuffer(this.outputTexture.width * this.outputTexture.height);
@@ -132,9 +140,9 @@ export class CCLQueryPost extends PostBase {
         this.borderLinkAtomic.setUint32("slot2", 0.0);
     }
 
-    /**
-     * @internal
-     */
+    activeComputes: ComputeShader[];
+    deactiveComputes: ComputeShader[];
+
     render(view: View3D, command: GPUCommandEncoder) {
         if (!this.indexCompute) {
             this.createResource();
@@ -145,13 +153,22 @@ export class CCLQueryPost extends PostBase {
             this.rendererPassState.label = "CCL";
         }
 
+        if (!this.activeComputes) {
+            this.activeComputes = [this.indexCompute, this.partitionCompute,
+            this.borderLinkClearCompute, this.borderLinkGenCompute,
+            this.redirectLinkCompute, this.blendCompute];
+
+            this.deactiveComputes = [this.blendCompute];
+        }
+
         this.cclUniformData.apply();
         this.borderLinkAtomic.apply();
+        if (this.activePost) {
+            GPUContext.computeCommand(command, this.activeComputes);
+        } else {
+            GPUContext.computeCommand(command, this.deactiveComputes);
 
-        GPUContext.computeCommand(command,
-            [this.indexCompute, this.partitionCompute,
-            this.borderLinkClearCompute, this.borderLinkGenCompute,
-            this.redirectLinkCompute, this.blendCompute]);
+        }
         GPUContext.lastRenderPassState = this.rendererPassState;
     }
 
@@ -161,6 +178,7 @@ export class CCLQueryPost extends PostBase {
 
         this.cclBuffer.resizeBuffer(w * h);
         this.borderLinkBuffer.resizeBuffer(w * h * 2);
+        this.redrectLinkBuffer.resizeBuffer(w * h);
 
         let fullWorkerSizeX = Math.ceil(w / 8);
         let fullWorkerSizeY = Math.ceil(h / 8);
@@ -190,5 +208,7 @@ export class CCLQueryPost extends PostBase {
         this.blendCompute.workerSizeX = fullWorkerSizeX;
         this.blendCompute.workerSizeY = fullWorkerSizeY;
         this.blendCompute.workerSizeZ = 1;
+
+        this.setPickData(null);
     }
 }

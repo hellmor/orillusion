@@ -123,6 +123,8 @@ class Sample_SetPlane {
 
         let postProcessing = this.scene.getOrAddComponent(PostProcessingComponent);
         this.cclPost = postProcessing.addPost(CCLQueryPost);
+        this.cclPost.activePost = false;
+        GUIHelp.add(this.cclPost, 'activePost');
 
         let car = await Engine3D.res.loadGltf('gltfs/glb/PotionBottle.glb');
 
@@ -142,7 +144,6 @@ class Sample_SetPlane {
         meshRenderer.geometry = geometry;
         meshRenderer.material = new LitMaterial();
 
-
         // GUIUtil.RenderColor(this.srcMaterial, 'selectPlaneColor');
         GUIHelp.add(this, 'isBottomPlane');
 
@@ -153,37 +154,50 @@ class Sample_SetPlane {
         let pickFire = this.scene.view.pickFire;
         this.scene.view.enablePick = true;
         pickFire.addEventListener(PointerEvent3D.PICK_CLICK, this.onMousePick, this);
-        pickFire.addEventListener(PointerEvent3D.PICK_MOVE, this.onMouseMove, this);
+        // pickFire.addEventListener(PointerEvent3D.PICK_MOVE, this.onMouseMove, this);
     }
 
     private onMousePick(e: PointerEvent3D) {
         let obj = e.data.pick?.object3D;
         if (obj == null) return;
-        let animation = obj.getComponent(SetPlaneAnimation);
-        if (!animation) {
-            let info = e.data.pickInfo;
-            let { worldPos, worldNormal } = info;
+        let info = e.data.pickInfo;
 
-            let component = obj.addComponent(SetPlaneAnimation);
-            component.playAnimation(worldPos, worldNormal, 300, this.isBottomPlane);
+        this.displaySelectArea(info);
+        setTimeout(() => {
             this.cclPost.setPickData(null);
-        }
+            this.cclPost.activePost = false;
+
+            let animation = obj.getComponent(SetPlaneAnimation);
+            if (!animation) {
+                let { worldPos, worldNormal, meshID, coord } = info;
+
+                let component = obj.addComponent(SetPlaneAnimation);
+                component.playAnimation(worldPos, worldNormal, 500, this.isBottomPlane);
+                this.cclPost.setPickData(null);
+            }
+        }, 500);
+
     }
 
-    private onMouseMove(e: PointerEvent3D) {
-        let obj = e.data.pick?.object3D;
-        if (obj == null) {
-            this.cclPost.setPickData(null, -1);
-            return;
-        };
-        let animation = obj.getComponent(SetPlaneAnimation);
-        if (!animation) {
-            let info = e.data.pickInfo;
-            let { worldPos, worldNormal, meshID, coord } = info;
-            this.plane.fromNormalAndPoint(worldNormal, worldPos);
-            this.plane.d *= -1;
-            this.cclPost.setPickData(this.plane, coord.x, coord.y, meshID);
-        }
+    // private onMouseMove(e: PointerEvent3D) {
+    //     let obj = e.data.pick?.object3D;
+    //     if (obj == null) {
+    //         this.cclPost.setPickData(null, -1);
+    //         return;
+    //     };
+    //     let animation = obj.getComponent(SetPlaneAnimation);
+    //     if (!animation) {
+    //         let info = e.data.pickInfo;
+    //         this.displaySelectArea(info);
+    //     }
+    // }
+
+    private displaySelectArea(info) {
+        this.cclPost.activePost = true;
+        let { worldPos, worldNormal, meshID, coord } = info;
+        this.plane.fromNormalAndPoint(worldNormal, worldPos);
+        this.plane.d *= -1;
+        this.cclPost.setPickData(this.plane, coord.x, coord.y, meshID);
     }
 
 

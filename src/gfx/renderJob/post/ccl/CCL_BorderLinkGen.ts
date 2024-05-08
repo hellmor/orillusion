@@ -8,8 +8,8 @@ export let CCL_BorderLinkGen: string = /*wgsl*/ `
       imageWidth:f32,
       imageHeight:f32,
       gridCount:f32,
+      activePost:f32,
       slot0:f32,
-      slot1:f32,
     } 
 
     struct BorderLinkAtomicStruct{
