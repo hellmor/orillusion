@@ -12,11 +12,12 @@ export let CCL_Blend: string = /*wgsl*/ `
       slot0:f32,
     } 
 
-    @group(0) @binding(0) var<uniform> cclUniformData: CCLUniformStruct;
-    @group(0) @binding(1) var<storage, read_write> cclBuffer : array<f32>;
-    @group(0) @binding(2) var<storage, read_write> labelRedirectBuffer : array<f32>;
-    @group(0) @binding(3) var colorTex : texture_2d<f32>;
-    @group(0) @binding(4) var outTex : texture_storage_2d<rgba16float, write>;
+    @group(0) @binding(0) var<uniform> selectPlaneColor: vec4<f32>;
+    @group(0) @binding(1) var<uniform> cclUniformData: CCLUniformStruct;
+    @group(0) @binding(2) var<storage, read_write> cclBuffer : array<f32>;
+    @group(0) @binding(3) var<storage, read_write> labelRedirectBuffer : array<f32>;
+    @group(0) @binding(4) var colorTex : texture_2d<f32>;
+    @group(0) @binding(5) var outTex : texture_storage_2d<rgba16float, write>;
 
     var<private> texSize: vec2<u32>;
     var<private> fragCoord: vec2<i32>;
@@ -38,9 +39,13 @@ export let CCL_Blend: string = /*wgsl*/ `
         let pickCoordY = i32(round(cclUniformData.coordY));
         var pIndex = pickCoordX + pickCoordY * i32(texSize.x);
         if(isLinked(pIndex, index)){
-          wColor.x = 0.5;
-          wColor.y = 0.1;
-          wColor.z = 0.1;
+          var srcColor = wColor.xyz;
+          var destColor = selectPlaneColor.xyz;
+          destColor = mix(srcColor, destColor, selectPlaneColor.w);
+
+          wColor.x = destColor.x;
+          wColor.y = destColor.y;
+          wColor.z = destColor.z;
         }
       }
       textureStore(outTex, fragCoord , wColor);

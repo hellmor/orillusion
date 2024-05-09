@@ -23,6 +23,7 @@ import {
 
 import { GUIHelp } from "@orillusion/debug/GUIHelp";
 import { GUIUtil } from "@samples/utils/GUIUtil";
+import { setFrameDelay, setTimeDelay } from "../../src/util/DelayUtil";
 
 class LerpData {
     quat: Quaternion = new Quaternion();
@@ -123,8 +124,7 @@ class Sample_SetPlane {
 
         let postProcessing = this.scene.getOrAddComponent(PostProcessingComponent);
         this.cclPost = postProcessing.addPost(CCLQueryPost);
-        this.cclPost.activePost = false;
-        GUIHelp.add(this.cclPost, 'activePost');
+        GUIUtil.RenderColor(this.cclPost, 'selectPlaneColor');
 
         let car = await Engine3D.res.loadGltf('gltfs/glb/PotionBottle.glb');
 
@@ -144,7 +144,6 @@ class Sample_SetPlane {
         meshRenderer.geometry = geometry;
         meshRenderer.material = new LitMaterial();
 
-        // GUIUtil.RenderColor(this.srcMaterial, 'selectPlaneColor');
         GUIHelp.add(this, 'isBottomPlane');
 
         return cube;
@@ -157,26 +156,31 @@ class Sample_SetPlane {
         // pickFire.addEventListener(PointerEvent3D.PICK_MOVE, this.onMouseMove, this);
     }
 
-    private onMousePick(e: PointerEvent3D) {
+    private async onMousePick(e: PointerEvent3D) {
         let obj = e.data.pick?.object3D;
         if (obj == null) return;
+        let animation = obj.getComponent(SetPlaneAnimation);
+        if (animation) return;
         let info = e.data.pickInfo;
-
+        this.cclPost.activePost = true;
         this.displaySelectArea(info);
-        setTimeout(() => {
-            this.cclPost.setPickData(null);
-            this.cclPost.activePost = false;
+        //等待一帧，供渲染
+        await setFrameDelay(1);
+        //暂停引擎，否则cclPost卡顿导致应用不流畅
+        Engine3D.pause();
+        //等待200ms后，恢复渲染，并且关闭cclPost
+        await setTimeDelay(200);
+        this.cclPost.setPickData(null);
+        this.cclPost.activePost = false;
+        Engine3D.resume();
+        //等待恢复渲染完毕的一帧之后，播放动画
+        await setFrameDelay(1);
 
-            let animation = obj.getComponent(SetPlaneAnimation);
-            if (!animation) {
-                let { worldPos, worldNormal, meshID, coord } = info;
-
-                let component = obj.addComponent(SetPlaneAnimation);
-                component.playAnimation(worldPos, worldNormal, 500, this.isBottomPlane);
-                this.cclPost.setPickData(null);
-            }
-        }, 500);
-
+        //应用之前的点击结果播放动画
+        let { worldPos, worldNormal, meshID, coord } = info;
+        let component = obj.addComponent(SetPlaneAnimation);
+        component.playAnimation(worldPos, worldNormal, 500, this.isBottomPlane);
+        this.cclPost.setPickData(null);
     }
 
     // private onMouseMove(e: PointerEvent3D) {
@@ -193,7 +197,6 @@ class Sample_SetPlane {
     // }
 
     private displaySelectArea(info) {
-        this.cclPost.activePost = true;
         let { worldPos, worldNormal, meshID, coord } = info;
         this.plane.fromNormalAndPoint(worldNormal, worldPos);
         this.plane.d *= -1;

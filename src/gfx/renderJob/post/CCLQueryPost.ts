@@ -19,16 +19,20 @@ import { CCL_Blend } from './ccl/CCL_Blend';
 import { CCL_BorderLinkClear } from './ccl/CCL_BorderLinkClear';
 import { CCL_BorderLinkGen } from './ccl/CCL_BorderLinkGen';
 import { CCL_BorderLinkRedirect } from './ccl/CCL_BorderLinkRedirect';
+import { CCL_VerticalScan } from './ccl/CCL_VerticleScan';
+import { Color } from '../../../math/Color';
 
 export class CCLQueryPost extends PostBase {
     private outputTexture: VirtualTexture;
     private rendererPassState: RendererPassState;
     private indexCompute: ComputeShader;
+    private verticleScanCompute: ComputeShader;
     private partitionCompute: ComputeShader;
     private borderLinkClearCompute: ComputeShader;
     private borderLinkGenCompute: ComputeShader;
     private redirectLinkCompute: ComputeShader;
     private blendCompute: ComputeShader;
+    private selectColorUniform: UniformGPUBuffer;
     private cclUniformData: UniformGPUBuffer;
     private cclUniformArray: Float32Array;
     private cclBuffer: StorageGPUBuffer;
@@ -39,6 +43,7 @@ export class CCLQueryPost extends PostBase {
 
     private readonly GridCount = 64;
 
+    public readonly selectPlaneColor: Color = new Color(0.6, 0.2, 0.2, 0.8);
     private _activePost: boolean = true;
     public get activePost(): boolean {
         return this._activePost;
@@ -83,6 +88,10 @@ export class CCLQueryPost extends PostBase {
     private createCompute() {
         let rtFrame = GBufferFrame.getGBufferFrame("ColorPassGBuffer");
         this.cclUniformData = new UniformGPUBuffer(12);
+
+        this.selectColorUniform = new UniformGPUBuffer(4);
+        this.selectColorUniform.setColor('data', this.selectPlaneColor);
+
         this.cclBuffer = new StorageGPUBuffer(this.outputTexture.width * this.outputTexture.height);
         this.borderLinkBuffer = new StorageGPUBuffer(this.outputTexture.width * this.outputTexture.height * 2);
         this.redrectLinkBuffer = new StorageGPUBuffer(this.outputTexture.width * this.outputTexture.height);
@@ -92,6 +101,11 @@ export class CCLQueryPost extends PostBase {
         this.indexCompute.setStorageBuffer('cclBuffer', this.cclBuffer);
         this.indexCompute.setSamplerTexture('posTex', rtFrame.getPositionMap());
         this.indexCompute.setSamplerTexture('normalTex', rtFrame.getNormalMap());
+        //verticle scan
+        this.verticleScanCompute = new ComputeShader(CCL_VerticalScan);
+        this.verticleScanCompute.setUniformBuffer('cclUniformData', this.cclUniformData);
+        this.verticleScanCompute.setStorageBuffer('cclBuffer', this.cclBuffer);
+
         //partition
         this.partitionCompute = new ComputeShader(CCL_Partition);
         this.partitionCompute.setUniformBuffer('cclUniformData', this.cclUniformData);
@@ -114,6 +128,7 @@ export class CCLQueryPost extends PostBase {
         this.redirectLinkCompute.setStorageBuffer('labelRedirectBuffer', this.redrectLinkBuffer);
         //blend
         this.blendCompute = new ComputeShader(CCL_Blend);
+        this.blendCompute.setUniformBuffer('selectPlaneColor', this.selectColorUniform);
         this.blendCompute.setUniformBuffer('cclUniformData', this.cclUniformData);
         this.blendCompute.setStorageBuffer('cclBuffer', this.cclBuffer);
         this.blendCompute.setStorageBuffer('labelRedirectBuffer', this.redrectLinkBuffer);
@@ -154,13 +169,15 @@ export class CCLQueryPost extends PostBase {
         }
 
         if (!this.activeComputes) {
-            this.activeComputes = [this.indexCompute, this.partitionCompute,
-            this.borderLinkClearCompute, this.borderLinkGenCompute,
-            this.redirectLinkCompute, this.blendCompute];
+            this.activeComputes =
+                [this.indexCompute, this.partitionCompute,
+                this.borderLinkClearCompute, this.borderLinkGenCompute,
+                this.redirectLinkCompute, this.blendCompute];
 
             this.deactiveComputes = [this.blendCompute];
         }
-
+        this.selectColorUniform.setColor('data', this.selectPlaneColor);
+        this.selectColorUniform.apply();
         this.cclUniformData.apply();
         this.borderLinkAtomic.apply();
         if (this.activePost) {
@@ -186,6 +203,10 @@ export class CCLQueryPost extends PostBase {
         this.indexCompute.workerSizeX = fullWorkerSizeX;
         this.indexCompute.workerSizeY = fullWorkerSizeY;
         this.indexCompute.workerSizeZ = 1;
+
+        this.verticleScanCompute.workerSizeX = fullWorkerSizeX;
+        this.verticleScanCompute.workerSizeY = 1;
+        this.verticleScanCompute.workerSizeZ = 1;
 
         this.borderLinkClearCompute.workerSizeX = fullWorkerSizeX;
         this.borderLinkClearCompute.workerSizeY = fullWorkerSizeY;
