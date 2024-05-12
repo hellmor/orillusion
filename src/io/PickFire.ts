@@ -140,6 +140,8 @@ export class PickFire extends CEventDispatcher {
             worldPos: this._pickCompute.getPickWorldPosition(),
             screenUv: this._pickCompute.getPickScreenUV(),
             meshID: this._pickCompute.getPickMeshID(),
+            worldNormal: this._pickCompute.getPickWorldNormal(),
+            coord: this._pickCompute.getPickCoord()
         };
     }
 
@@ -148,11 +150,12 @@ export class PickFire extends CEventDispatcher {
         this._mouseCode = e.mouseCode;
         this.pick(this._view.camera);
         let target = this.findNearestObj(this._interestList, this._view.camera);
+        this._mouseMove.target = target?.object3D;
+        this._mouseMove.ctrlKey = e.ctrlKey;
+        let pickInfo = target ? this.getPickInfo() : null;
+        this._mouseMove.data = { pick: target, pickInfo, mouseCode: this._mouseCode };
+        this.dispatchEvent(this._mouseMove);
         if (target) {
-            this._mouseMove.target = target.object3D;
-            this._mouseMove.ctrlKey = e.ctrlKey;
-            this._mouseMove.data = { pick: target, pickInfo: this.getPickInfo(), mouseCode: this._mouseCode };
-            this.dispatchEvent(this._mouseMove);
             if (target.object3D.containEventListener(PointerEvent3D.PICK_MOVE)) {
                 target.object3D.dispatchEvent(this._mouseMove);
             }
