@@ -17,6 +17,8 @@ import { PostBase } from '../post/PostBase';
 import { RendererBase } from '../passRenderer/RendererBase';
 import { Ctor } from '../../../util/Global';
 import { DDGIProbeRenderer } from '../passRenderer/ddgi/DDGIProbeRenderer';
+import { CollisionPassRenderer } from '../passRenderer/collision/CollisionPassRenderer';
+import { CollisionSetting } from '../../..';
 
 /**
  * render jobs 
@@ -47,6 +49,9 @@ export class RendererJob {
     /**
      * @internal
      */
+
+    public collisionRenderer: CollisionPassRenderer;
+
     public postRenderer: PostRenderer;
 
     /**
@@ -219,6 +224,11 @@ export class RendererJob {
         if (Engine3D.setting.gi.enable && this.ddgiProbeRenderer) {
             this.ddgiProbeRenderer.compute(view, this.occlusionSystem);
             this.ddgiProbeRenderer.render(view, this.occlusionSystem);
+        }
+
+        if (this.collisionRenderer && CollisionSetting.Enable) {
+            this.collisionRenderer.compute(view, this.occlusionSystem);
+            this.collisionRenderer.render(view, this.occlusionSystem);
         }
 
         let passList = this.rendererMap.getAllPassRenderer();

@@ -13,5 +13,6 @@ export enum PassType {
     POINT_SHADOW = 1 << 7,
     POST = 1 << 8,
     DEPTH = 1 << 9,
-    REFLECTION = 1 << 10
+    REFLECTION = 1 << 10,
+    COLLISION = 1 << 11,
 }
