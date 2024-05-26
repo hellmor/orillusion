@@ -9,6 +9,7 @@ import { webGPUContext } from '../../graphics/webGpu/Context3D';
 import { RTResourceConfig } from '../config/RTResourceConfig';
 import { RTResourceMap } from '../frame/RTResourceMap';
 import { GPUTextureFormat } from '../../graphics/webGpu/WebGPUConst';
+import { CollisionPassRenderer } from '../passRenderer/collision/CollisionPassRenderer';
 /**
  * Forward+
  * Every time a forward rendering is performed, 
@@ -34,6 +35,9 @@ export class ForwardRenderJob extends RendererJob {
             if (Engine3D.setting.render.zPrePass) {
                 rtFrame.zPreTexture = this.depthPassRenderer.rendererPassState.depthTexture;
             }
+
+            this.collisionRenderer = new CollisionPassRenderer();
+            this.rendererMap.addRenderer(this.collisionRenderer);
 
             colorPassRenderer.setRenderStates(rtFrame);
 

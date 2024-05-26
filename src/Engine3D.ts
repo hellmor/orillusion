@@ -57,6 +57,7 @@ export class Engine3D {
     private static _time: number = 0;
     private static _beforeRender: Function;
     private static _renderLoop: Function;
+    private static _resumeRender: Function;
     private static _lateRender: Function;
     private static _requestAnimationFrameID: number = 0;
     static Engine3D: any;
@@ -310,7 +311,7 @@ export class Engine3D {
      * @param descriptor  {@link CanvasConfig}
      * @returns
      */
-    public static async init(descriptor: { canvasConfig?: CanvasConfig; beforeRender?: Function; renderLoop?: Function; lateRender?: Function, engineSetting?: EngineSetting } = {}) {
+    public static async init(descriptor: { canvasConfig?: CanvasConfig; beforeRender?: Function; renderLoop?: Function; lateRender?: Function, engineSetting?: EngineSetting, resumeRender?: Function } = {}) {
         console.log('Engine Version', version);
 
         // for dev debug
@@ -346,6 +347,7 @@ export class Engine3D {
         this._beforeRender = descriptor.beforeRender;
         this._renderLoop = descriptor.renderLoop;
         this._lateRender = descriptor.lateRender;
+        this._resumeRender = descriptor.resumeRender;
         this.inputSystem = new InputSystem();
         this.inputSystem.initCanvas(webGPUContext.canvas);
         return;
@@ -427,6 +429,7 @@ export class Engine3D {
         }
     }
 
+    // public static BreakExternal: boolean;
     /**
      * Resume the engine render
      */
@@ -451,7 +454,10 @@ export class Engine3D {
         } else {
             this.updateFrame(time);
         }
-        this.resume();
+
+        if (!this._resumeRender || this._resumeRender()) {
+            this.resume();
+        }
     }
 
     private static updateFrame(time: number) {

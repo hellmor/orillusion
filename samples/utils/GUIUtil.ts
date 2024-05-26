@@ -61,18 +61,18 @@ export class GUIUtil {
     }
 
     //render transform
-    public static renderTransform(transform: Transform, open: boolean = true, name?: string) {
+    public static renderTransform(transform: Transform, open: boolean = true, name?: string, onChange?) {
         name ||= 'Transform';
         GUIHelp.addFolder(name);
-        GUIHelp.add(transform, 'x', -100.0, 100.0, 0.01);
-        GUIHelp.add(transform, 'y', -100.0, 100.0, 0.01);
-        GUIHelp.add(transform, 'z', -100.0, 100.0, 0.01);
-        GUIHelp.add(transform, 'rotationX', 0.0, 360.0, 0.01);
-        GUIHelp.add(transform, 'rotationY', 0.0, 360.0, 0.01);
-        GUIHelp.add(transform, 'rotationZ', 0.0, 360.0, 0.01);
-        GUIHelp.add(transform, 'scaleX', -2.0, 2.0, 0.01);
-        GUIHelp.add(transform, 'scaleY', -2.0, 2.0, 0.01);
-        GUIHelp.add(transform, 'scaleZ', -2.0, 2.0, 0.01);
+        GUIHelp.add(transform, 'x', -100.0, 100.0, 0.01).onChange((v) => { onChange?.(v) });
+        GUIHelp.add(transform, 'y', -100.0, 100.0, 0.01).onChange((v) => { onChange?.(v) });
+        GUIHelp.add(transform, 'z', -100.0, 100.0, 0.01).onChange((v) => { onChange?.(v) });
+        GUIHelp.add(transform, 'rotationX', 0.0, 360.0, 0.01).onChange((v) => { onChange?.(v) });
+        GUIHelp.add(transform, 'rotationY', 0.0, 360.0, 0.01).onChange((v) => { onChange?.(v) });
+        GUIHelp.add(transform, 'rotationZ', 0.0, 360.0, 0.01).onChange((v) => { onChange?.(v) });
+        GUIHelp.add(transform, 'scaleX', -2.0, 2.0, 0.01).onChange((v) => { onChange?.(v) });
+        GUIHelp.add(transform, 'scaleY', -2.0, 2.0, 0.01).onChange((v) => { onChange?.(v) });
+        GUIHelp.add(transform, 'scaleZ', -2.0, 2.0, 0.01).onChange((v) => { onChange?.(v) });
 
         open && GUIHelp.open();
         GUIHelp.endFolder();

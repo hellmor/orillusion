@@ -45,6 +45,7 @@ import { GBuffer_pass } from './core/pass/GBuffer_pass';
 import { castPointShadowMap_vert, directionShadowCastMap_frag, shadowCastMap_frag, shadowCastMap_vert } from './core/pass/CastShadow_pass';
 import { ZPassShader_vs } from './core/pass/ZPassShader_vs';
 import { ZPassShader_fs } from './core/pass/ZPassShader_fs';
+import { Collision_shader } from './core/pass/Collision_pass';
 
 /**
  * @internal
@@ -117,6 +118,8 @@ export class ShaderLib {
 
         ShaderLib.register("gbuffer_vs", GBuffer_pass);
         ShaderLib.register("gbuffer_fs", GBuffer_pass);
+
+        ShaderLib.register("collision_shader", Collision_shader);
 
         ShaderLib.register("castPointShadowMap_vert", castPointShadowMap_vert);
         ShaderLib.register("shadowCastMap_frag", shadowCastMap_frag);

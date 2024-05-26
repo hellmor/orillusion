@@ -23,7 +23,7 @@ import { OctreeEntity } from "../../core/tree/octree/OctreeEntity";
 import { Transform } from "../Transform";
 import { Material } from "../../materials/Material";
 import { RenderLayer } from "../../gfx/renderJob/config/RenderLayer";
-import { RenderShaderCompute, ComputeShader } from "../..";
+import { RenderShaderCompute, ComputeShader, Color } from "../..";
 
 
 /**
@@ -42,6 +42,7 @@ export class RenderNode extends ComponentBase {
     protected _castShadow: boolean = true;
     protected _castReflection: boolean = false;
     protected _castGI: boolean = false;
+    protected _castCollision: boolean = false;
     protected _rendererMask: number = RendererMask.Default;
     protected _inRenderer: boolean = false;
     protected _readyPipeline: boolean = false;
@@ -302,6 +303,13 @@ export class RenderNode extends ComponentBase {
             }
         }
 
+        if (this.castCollision) {
+            for (let i = 0; i < this.materials.length; i++) {
+                const mat = this.materials[i];
+                PassGenerate.createCollisionPass(this, mat.shader);
+            }
+        }
+
         // if (this.castShadow) {
         for (let i = 0; i < this.materials.length; i++) {
             const mat = this.materials[i];
@@ -353,6 +361,21 @@ export class RenderNode extends ComponentBase {
     @EditorInspector
     public set castGI(value: boolean) {
         this._castGI = value;
+    }
+
+    public get castCollision(): boolean {
+        return this._castCollision;
+    }
+
+    public set castCollision(value: boolean) {
+        if (this._castCollision != value) {
+            this._castCollision = value;
+            this._readyPipeline = false;
+            this.initPipeline();
+            for (let item of this._materials) {
+                item.shader.noticeValueChange();
+            }
+        }
     }
 
     public get castReflection(): boolean {
@@ -428,6 +451,9 @@ export class RenderNode extends ComponentBase {
             const material = this.materials[i];
             if (!material.castShadow && passType == PassType.SHADOW)
                 continue;
+            if (!this.castCollision && passType == PassType.COLLISION) {
+                continue;
+            }
             // material.applyUniform();
             let passes = material.getPass(passType);
             if (!passes || passes.length == 0)

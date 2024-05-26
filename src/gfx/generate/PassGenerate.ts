@@ -9,6 +9,7 @@ import { VertexAttributeName } from '../../core/geometry/VertexAttributeName';
 import { CastShadowMaterialPass } from '../../materials/multiPass/CastShadowMaterialPass';
 import { CastPointShadowMaterialPass } from '../../materials/multiPass/CastPointShadowMaterialPass';
 import { DepthMaterialPass } from '../../materials/multiPass/DepthMaterialPass';
+import { CollisionQueryMaterialPass } from '../../materials/multiPass/CollisionQueryMaterialPass';
 
 /**
  * @internal
@@ -124,6 +125,26 @@ export class PassGenerate {
                 shader.addRenderPass(castPointShadowPass);
             }
         }
+    }
+
+    public static createCollisionPass(renderNode: RenderNode, shader: Shader) {
+        let colorPassList = shader.getDefaultShaders();
+        for (let jj = 0; jj < colorPassList.length; jj++) {
+            const colorPass = colorPassList[jj];
+
+            let giPassList = shader.getSubShaders(PassType.COLLISION);
+            if (!giPassList || giPassList.length == 0 || giPassList.length < jj) {
+                let pass = new CollisionQueryMaterialPass();
+                pass.setTexture('baseMap', colorPass.getTexture("baseMap"));
+                pass.setUniform('baseColor', colorPass.getUniform("baseColor"));
+
+                pass.cullMode = colorPass.cullMode;
+                pass.frontFace = colorPass.frontFace;
+                pass.preCompile(renderNode.geometry);
+                shader.addRenderPass(pass);
+            }
+        }
+
     }
 
     public static createDepthPass(renderNode: RenderNode, shader: Shader) {

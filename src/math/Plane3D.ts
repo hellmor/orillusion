@@ -161,7 +161,9 @@ export class Plane3D {
         this.a = normal.x;
         this.b = normal.y;
         this.c = normal.z;
-        this.d = -(this.a * point.x + this.b * point.y + this.c * point.z);
+
+        this.d = -Vector3.dot(point, normal);
+        // this.d = -(this.a * point.x + this.b * point.y + this.c * point.z);
     }
 
     /**
