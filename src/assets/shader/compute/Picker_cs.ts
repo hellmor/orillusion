@@ -1,4 +1,3 @@
-
 export let Picker_cs: string = /*wgsl*/ `
 
     #include "GlobalUniform"
@@ -19,7 +18,6 @@ export let Picker_cs: string = /*wgsl*/ `
         pick_Coord:vec2<f32>,
         v4:vec2<f32>,
 
-        v4:vec4<f32>,
         v5:vec4<f32>,
         v6:vec4<f32>,
         v7:vec4<f32>
