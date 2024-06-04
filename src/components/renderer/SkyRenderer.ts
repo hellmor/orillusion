@@ -28,7 +28,7 @@ export class SkyRenderer extends MeshRenderer {
     public init(): void {
         super.init();
         this.castShadow = false;
-        this.castGI = true;
+        this.castGI = false;
         this.addRendererMask(RendererMask.Sky);
         this.alwaysRender = true;
 

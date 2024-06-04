@@ -1,4 +1,4 @@
-import { ComponentBase, ComputeGPUBuffer, Engine3D, Plane3D, SliceDataReader, SliceImageData, Time, ToothClipTag, ToothMaterial, Vector3, clamp } from "../..";
+import { Color, ComponentBase, ComputeGPUBuffer, Engine3D, MeshRenderer, Object3D, Plane3D, PlaneGeometry, SliceDataReader, SliceImageData, Time, ToothClipTag, ToothMaterial, UnLitMaterial, Vector3, clamp } from "../..";
 
 export class SliceController extends ComponentBase {
 
@@ -11,6 +11,8 @@ export class SliceController extends ComponentBase {
     material: ToothMaterial;
     plane: Plane3D;
     maxIndex: number;
+    planeObj: Object3D;
+
     indexOffset: number = 0.01;
     private _sliceIndex: number = -99;
     public get sliceIndex(): number {
@@ -25,6 +27,8 @@ export class SliceController extends ComponentBase {
         if (this._sliceIndex != value) {
             this._sliceIndex = value;
             this.plane.fromNormalAndPoint(this.up, this.position.set(0, -(value + this.indexOffset), 0));
+            this.planeObj.localPosition = new Vector3(0, this.plane.d, 0);
+
             this.material.clipPlanes = this.material.clipPlanes;
         }
     }
@@ -52,6 +56,34 @@ export class SliceController extends ComponentBase {
         this.sliceDataReader = new SliceDataReader();
         this.sliceDataMap = new Map<number, SliceImageData>();
         this.sliceDataReader.callback.add(this.onDataReadSuccess, this);
+
+        this.planeObj = this.initPlane();
+    }
+
+
+    initPlane() {
+        let plane = new Object3D();
+        let renderer = plane.addComponent(MeshRenderer);
+        plane.y = 400;
+        let geometry = new PlaneGeometry(4096, 4096);
+        let material = new UnLitMaterial();
+        material.baseColor = new Color(1, 0, 0, 1);
+        material.castShadow = false;
+        material.acceptShadow = false;
+
+        let depthStencil: GPUDepthStencilState = {
+            depthWriteEnabled: false,
+            depthCompare: 'always',
+            stencilWriteMask: 0xFFFFFFFF,
+            stencilReadMask: 0xFFFFFFFF,
+            stencilBack: { compare: "not-equal", failOp: 'replace', passOp: 'replace', depthFailOp: 'replace' },
+            stencilFront: { compare: "not-equal", failOp: 'replace', passOp: 'replace', depthFailOp: 'replace' }
+        } as any;
+        material.shader.getDefaultColorShader().depthStencil = depthStencil;
+        renderer.geometry = geometry;
+        renderer.material = material;
+        Engine3D.views[0].scene.addChild(plane);
+        return plane;
     }
 
     private onDataReadSuccess(image: SliceImageData) {

@@ -1,7 +1,6 @@
 import { GUIHelp } from "@orillusion/debug/GUIHelp";
-import { Scene3D, View3D, Engine3D, PostProcessingComponent, ToothMaterial, CameraUtil, Vector3, Object3D, DirectLight, KelvinUtil, MeshRenderer, SphereGeometry, SliceController, PlaneGeometry, LitMaterial, Color, UnLitMaterial, BlendMode } from "../../src";
+import { Scene3D, View3D, Engine3D, PostProcessingComponent, ToothMaterial, CameraUtil, Vector3, Object3D, DirectLight, KelvinUtil, MeshRenderer, SphereGeometry, SliceController } from "../../src";
 import { SlicePostEffect } from "../../src/tooth/slice/SlicePostEffect";
-import { GUIUtil } from "@samples/utils/GUIUtil";
 
 class Sample_Slice {
     viewSize = 400;
@@ -30,7 +29,6 @@ class Sample_Slice {
 
         this.initLight();
         this.initSliceModel();
-        this.initPlane();
     }
 
     createOrthoCamera() {
@@ -41,14 +39,8 @@ class Sample_Slice {
         this.view = new View3D();
         this.view.scene = this.scene;
         this.view.camera = camera;
-
-        GUIHelp.add(this, 'cameraPos', -this.near, 400, 1).onChange((value) => { this.updateCamera(value); })
     }
 
-    public cameraPos = 0;
-    updateCamera(value: number) {
-        this.view.camera.lookAt(new Vector3(0, value, 0), new Vector3(0, value + 100, 0), new Vector3(0, 0, 1));
-    }
     initLight() {
         let lightObj3D = new Object3D();
         lightObj3D.rotationX = 35;
@@ -61,29 +53,7 @@ class Sample_Slice {
         this.scene.addChild(lightObj3D);
     }
 
-    initPlane() {
-        let plane = new Object3D();
-        let renderer = plane.addComponent(MeshRenderer);
-        plane.y = 400;
-        let geometry = new PlaneGeometry(150, 150);
-        let material = new UnLitMaterial();
-        material.baseColor = new Color(1, 1, 0, 0.5);
-        material.castShadow = false;
-        material.acceptShadow = false;
 
-        let depthStencil: GPUDepthStencilState = {
-            depthWriteEnabled: false,
-            depthCompare: 'always',
-            stencilWriteMask: 0xFFFFFFFF,
-            stencilReadMask: 0xFFFFFFFF,
-            stencilBack: { compare: "not-equal", failOp: 'replace', passOp: 'replace', depthFailOp: 'replace' },
-            stencilFront: { compare: "not-equal", failOp: 'replace', passOp: 'replace', depthFailOp: 'replace' }
-        } as any;
-        material.shader.getDefaultColorShader().depthStencil = depthStencil;
-        renderer.geometry = geometry;
-        renderer.material = material;
-        this.scene.addChild(plane);
-    }
 
     initSliceModel() {
         let material = this.createMaterial();

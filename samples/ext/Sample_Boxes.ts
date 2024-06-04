@@ -1,5 +1,5 @@
 import { GUIHelp } from "@orillusion/debug/GUIHelp";
-import { Engine3D, View3D, Scene3D, CameraUtil, AtmosphericComponent, webGPUContext, HoverCameraController, Object3D, DirectLight, KelvinUtil, PlaneGeometry, VertexAttributeName, LitMaterial, MeshRenderer, Vector4, Vector3, Matrix3, PostProcessingComponent, TAAPost, BitmapTexture2D, GlobalFog, Color, BoxGeometry, UnLitMaterial, PointLight, GTAOPost, BloomPost } from "@orillusion/core";
+import { Engine3D, View3D, Scene3D, CameraUtil, AtmosphericComponent, webGPUContext, HoverCameraController, Object3D, DirectLight, KelvinUtil, PlaneGeometry, VertexAttributeName, LitMaterial, MeshRenderer, Vector4, Vector3, Matrix3, PostProcessingComponent, TAAPost, BitmapTexture2D, GlobalFog, Color, BoxGeometry, UnLitMaterial, PointLight, GTAOPost, BloomPost, ToothMaterial } from "@orillusion/core";
 import { GUIUtil } from "@samples/utils/GUIUtil";
 import { GrassComponent, TerrainGeometry } from "@orillusion/effect";
 
@@ -8,11 +8,11 @@ class Sample_Boxes {
     view: View3D;
     post: PostProcessingComponent;
     async run() {
-        Engine3D.setting.shadow.enable = true;
-        Engine3D.setting.shadow.updateFrameRate = 1;
-        Engine3D.setting.shadow.shadowBound = 500;
-        Engine3D.setting.shadow.autoUpdate = true;
-        Engine3D.setting.shadow.shadowSize = 1024;
+        // Engine3D.setting.shadow.enable = true;
+        // Engine3D.setting.shadow.updateFrameRate = 1;
+        // Engine3D.setting.shadow.shadowBound = 500;
+        // Engine3D.setting.shadow.autoUpdate = true;
+        // Engine3D.setting.shadow.shadowSize = 1024;
         // Engine3D.setting.render.zPrePass = true;
 
         GUIHelp.init();
@@ -23,7 +23,6 @@ class Sample_Boxes {
         this.view.scene.addComponent(AtmosphericComponent);
 
         this.view.camera = CameraUtil.createCamera3DObject(this.view.scene);
-        this.view.camera.enableCSM = true;
         this.view.camera.perspective(60, webGPUContext.aspect, 1, 50000.0);
         this.view.camera.object3D.z = -15;
         this.view.camera.object3D.addComponent(HoverCameraController).setCamera(35, -20, 1000);
@@ -32,7 +31,7 @@ class Sample_Boxes {
 
         this.post = this.view.scene.addComponent(PostProcessingComponent);
         this.post.addPost(GTAOPost);
-        this.post.addPost(BloomPost);
+        // this.post.addPost(BloomPost);
         let fog = this.post.addPost(GlobalFog);
         fog.start = 91.0862;
         fog.end = 487.5528;
@@ -58,7 +57,7 @@ class Sample_Boxes {
             let sunObj = new Object3D();
             let sunLight = sunObj.addComponent(DirectLight);
             sunLight.lightColor = KelvinUtil.color_temperature_to_rgb(6553);
-            sunLight.castShadow = true;
+            sunLight.castShadow = false;
             sunLight.intensity = 45;
             sunObj.transform.rotationX = 50;
             sunObj.transform.rotationY = 50;
@@ -68,7 +67,7 @@ class Sample_Boxes {
 
         {
             let geometry = new BoxGeometry(5, 200, 5);
-            let litMaterial = new LitMaterial();
+            let litMaterial = new ToothMaterial();
             // let litMaterial = new UnLitMaterial();
             let w = 30;
             let h = 30;

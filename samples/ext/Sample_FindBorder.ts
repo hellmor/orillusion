@@ -10,6 +10,7 @@ import {
     ToothModelTransformer,
     Transform,
     AxisObject,
+    ToothMaterial,
 } from "@orillusion/core";
 
 import { GUIHelp } from "@orillusion/debug/GUIHelp";
@@ -25,8 +26,8 @@ class Sample_FindBorder {
     async run() {
         GUIHelp.init();
 
-        Engine3D.setting.shadow.shadowSize = 2048
-        Engine3D.setting.shadow.shadowBound = 100;
+        // Engine3D.setting.shadow.shadowSize = 2048
+        // Engine3D.setting.shadow.shadowBound = 100;
 
         await Engine3D.init();
 
@@ -130,17 +131,16 @@ class Sample_FindBorder {
     }
 
     async loadSrcAssets() {
-        let renderer = await this.loadToothMesh();
-        this.srcGeometry = renderer.geometry;
-        this.srcMaterial = renderer.material;
+        let geometry = await this.loadToothMesh();
+        this.srcGeometry = geometry;
+        this.srcMaterial = new ToothMaterial();
     }
 
-    async loadToothMesh(): Promise<MeshRenderer> {
+    async loadToothMesh(): Promise<GeometryBase> {
         let model = await Engine3D.res.loadGltf('tooth/blender_glb.glb');
         let renderer = model.getComponentsInChild(MeshRenderer)[0];
-        renderer.material = new LitMaterial();
 
-        return renderer;
+        return renderer.geometry;
     }
 
     async initScene() {
@@ -150,7 +150,7 @@ class Sample_FindBorder {
         this.lightObj.rotationZ = 0;
         let lc = this.lightObj.addComponent(DirectLight);
         lc.lightColor = KelvinUtil.color_temperature_to_rgb(5355);
-        lc.castShadow = true;
+        lc.castShadow = false;
         lc.intensity = 20;
         lc.indirect = 1
         this.scene.addChild(this.lightObj);
