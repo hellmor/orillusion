@@ -51,7 +51,7 @@ export class SliceController extends ComponentBase {
 
         this.plane = this.material.clipPlanes[0];
         this.material.setClipEnable(0, ToothClipTag.Negative);
-        this.material.doubleSide = true;
+        this.material.doubleSide = false;
 
         this.sliceDataReader = new SliceDataReader();
         this.sliceDataMap = new Map<number, SliceImageData>();

@@ -1,5 +1,5 @@
 import { GUIHelp } from "@orillusion/debug/GUIHelp";
-import { Scene3D, View3D, Engine3D, PostProcessingComponent, ToothMaterial, CameraUtil, Vector3, Object3D, DirectLight, KelvinUtil, MeshRenderer, SphereGeometry, SliceController } from "../../src";
+import { Scene3D, View3D, Engine3D, PostProcessingComponent, ToothMaterial, CameraUtil, Vector3, Object3D, DirectLight, KelvinUtil, MeshRenderer, SphereGeometry, SliceController, TorusGeometry } from "../../src";
 import { SlicePostEffect } from "../../src/tooth/slice/SlicePostEffect";
 
 class Sample_Slice {
@@ -54,26 +54,32 @@ class Sample_Slice {
     }
 
 
-
     initSliceModel() {
         let material = this.createMaterial();
 
-        {
-            let model1 = new Object3D();
-            model1.y = this.modelRadius;
-            this.scene.addChild(model1);
-            let renderer = model1.addComponent(MeshRenderer);
-            renderer.geometry = new SphereGeometry(this.modelRadius, 40, 40);
+        for (let i = 0; i < 5; i++) {
+            let model = new Object3D();
+            model.y = this.modelRadius;
+            this.scene.addChild(model);
+            let renderer = model.addComponent(MeshRenderer);
+            renderer.geometry = new SphereGeometry(this.modelRadius * 0.4 * (Math.random() + 0.5), 40, 40);
             renderer.material = material;
+            model.x = (Math.random() - 0.5) * 200;
+            model.z = (Math.random() - 0.5) * 200;
+            model.y = 100 + (Math.random()) * 100;
+
         }
 
-        {
-            let model1 = new Object3D();
-            model1.y = this.modelRadius;
-            this.scene.addChild(model1);
-            let renderer = model1.addComponent(MeshRenderer);
-            renderer.geometry = new SphereGeometry(this.modelRadius * 0.5, 40, 40);
+        for (let i = 0; i < 10; i++) {
+            let model = new Object3D();
+            model.y = this.modelRadius;
+            this.scene.addChild(model);
+            let renderer = model.addComponent(MeshRenderer);
+            renderer.geometry = new TorusGeometry(this.modelRadius * 0.4 * (Math.random() + 0.5), 10 + Math.random() * 20, 20, 20);
             renderer.material = material;
+            model.x = (Math.random() - 0.5) * 50;
+            model.z = (Math.random() - 0.5) * 50;
+            model.y = 100 + (Math.random()) * 100;
         }
 
         GUIHelp.add({ sliceIndex: 0 }, 'sliceIndex', 0, this.modelRadius * 2.0, 1).onChange((value) => {
@@ -94,7 +100,7 @@ class Sample_Slice {
             depthCompare: 'always',
             stencilWriteMask: 0xFFFFFFFF,
             stencilReadMask: 0xFFFFFFFF,
-            stencilFront: { compare: "always", failOp: 'increment-wrap', passOp: 'increment-wrap', depthFailOp: 'increment-wrap' },
+            stencilFront: { compare: "always", failOp: 'increment-clamp', passOp: 'increment-clamp', depthFailOp: 'increment-clamp' },
             stencilBack: { compare: "always", failOp: 'decrement-clamp', passOp: 'decrement-clamp', depthFailOp: 'decrement-clamp' }
         } as any;
 
