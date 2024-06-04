@@ -214,6 +214,7 @@ export class RendererBase extends CEventDispatcher {
                     break;
 
                 case GPUTextureFormat.depth24plus:
+                case GPUTextureFormat.depth24plus_stencil8:
                 case GPUTextureFormat.depth32float:
                     fs = `Quad_depth2d_frag_wgsl`;
                     if (tex.textureBindingLayout.viewDimension == `cube`) {

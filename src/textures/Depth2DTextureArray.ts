@@ -34,6 +34,7 @@ export class Depth2DTextureArray extends Texture implements ITexture {
         this.sampler_comparisonBindingLayout.type = `comparison`;
     }
 
+
     internalCreateTexture() {
         this.textureDescriptor = {
             format: this.format,

@@ -75,6 +75,7 @@ export class ColorPassRenderer extends RendererBase {
             }
 
             if (collectInfo.opaqueList) {
+                renderPassEncoder.setStencilReference(0);
                 GPUContext.bindCamera(renderPassEncoder, camera);
                 this.drawNodes(view, this.renderContext, collectInfo.opaqueList, occlusionSystem, clusterLightingBuffer);
                 this.renderContext.endRenderPass();

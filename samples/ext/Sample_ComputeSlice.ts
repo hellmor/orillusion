@@ -1,6 +1,5 @@
 import { GUIHelp } from "@orillusion/debug/GUIHelp";
-import { Scene3D, View3D, Engine3D, PostProcessingComponent, ToothMaterial, CameraUtil, Vector3, Object3D, DirectLight, KelvinUtil, MeshRenderer, SphereGeometry, SliceController, SliceCompute } from "../../src";
-import { SlicePostEffect } from "../../src/tooth/slice/SlicePostEffect";
+import { Scene3D, View3D, Engine3D, ToothMaterial, CameraUtil, Vector3, Object3D, DirectLight, KelvinUtil, MeshRenderer, SphereGeometry, SliceController, SliceCompute, Vector2, SliceComputeDebug, ForwardRenderJob } from "../../src";
 
 class Sample_ComputeSlice {
     viewSize = 400;
@@ -10,6 +9,7 @@ class Sample_ComputeSlice {
     view: View3D;
     toothMaterial: ToothMaterial;
 
+    job: ForwardRenderJob;
     async run() {
         await Engine3D.init(
             {
@@ -21,7 +21,7 @@ class Sample_ComputeSlice {
 
         this.scene = new Scene3D();
         this.createOrthoCamera();
-        Engine3D.startRenderView(this.view);
+        this.job = Engine3D.startRenderView(this.view);
 
         this.initLight();
         this.initSliceModel();
@@ -30,7 +30,7 @@ class Sample_ComputeSlice {
     createOrthoCamera() {
         let camera = CameraUtil.createCamera3DObject(this.scene);
         camera.ortho(this.viewSize, this.viewSize, this.near, this.viewSize * 5);
-        camera.lookAt(new Vector3(0, -this.near, 0), new Vector3(0, 100, 0), new Vector3(0, 0, 1));
+        camera.lookAt(new Vector3(0, 0, 0), new Vector3(0, 1, 0), new Vector3(0, 0, 1));
 
         this.view = new View3D();
         this.view.scene = this.scene;
@@ -57,18 +57,18 @@ class Sample_ComputeSlice {
         this.scene.addChild(model);
 
         let renderer = model.addComponent(MeshRenderer);
-        renderer.geometry = new SphereGeometry(this.modelRadius, 40, 40);
+        renderer.geometry = new SphereGeometry(this.modelRadius, 256, 256);
         this.toothMaterial = renderer.material = new ToothMaterial(true);
 
         GUIHelp.addButton('Click', () => {
             if (this.compute == null) {
                 this.compute = new SliceCompute().init();
             }
-            let time = performance.now();
-            this.compute.compute(this.view, renderer.transform.worldMatrix, renderer.geometry, 10);
-            // this.compute.getPickWorldNormal();
-            console.log(performance.now() - time);
-
+            let viewSize = new Vector2(this.viewSize, this.viewSize);
+            this.compute.compute(this.view, viewSize, renderer.transform.worldMatrix, renderer.geometry, 100);
+            // let debugPost = new SliceComputeDebug();
+            // this.job.addPost(debugPost);
+            // debugPost.initInputBuffer(this.compute._outBuffer, this.compute._sliceUniform);
         })
         GUIHelp.open();
     }

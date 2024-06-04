@@ -18,7 +18,7 @@ export class CollisionGBufferFrame extends RTFrame {
         let colorDec = new RTDescriptor();
         colorDec.loadOp = `clear`;
 
-        let depthTexture = new RenderTexture(rtWidth, rtHeight, GPUTextureFormat.depth24plus, false, undefined, 1, 0, true, autoResize);
+        let depthTexture = new RenderTexture(rtWidth, rtHeight, GPUTextureFormat.depth24plus_stencil8, false, undefined, 1, 0, true, autoResize);
         depthTexture.name = `depthTexture`;
         let depthDec = new RTDescriptor();
         depthDec.loadOp = `clear`;

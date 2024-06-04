@@ -18,7 +18,7 @@ export class DepthCubeArrayTexture extends Texture implements ITexture {
         // this.visibility = GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE;
 
         // texture_depth_2d_array
-        this.format = GPUTextureFormat.depth32float;
+        this.format = GPUTextureFormat.depth32float_stencil8;
         this.mipmapCount = 1;
 
         this.init();
