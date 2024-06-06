@@ -80,7 +80,7 @@ export class RenderShaderPass extends ShaderPassBase {
     protected _textureGroup: number = -1;
     protected _textureChange: boolean = false;
     protected _groupsShaderReflectionVarInfos: ShaderReflectionVarInfo[][];
-    outBufferMask: Vector4;
+    public depthStencil?: GPUDepthStencilState;
 
     constructor(vs: string, fs: string) {
         super();
@@ -774,12 +774,16 @@ export class RenderShaderPass extends ShaderPassBase {
                     format: renderPassState.zPreTexture.format,
                 };
             } else {
-                renderPipelineDescriptor[`depthStencil`] = {
+                let depthStencil = {
                     depthWriteEnabled: shaderState.depthWriteEnabled,
                     depthCompare: shaderState.depthCompare,
                     format: renderPassState.depthTexture.format,
                 };
 
+                if (this.depthStencil) {
+                    Object.assign(depthStencil, this.depthStencil);
+                }
+                renderPipelineDescriptor[`depthStencil`] = depthStencil as any;
             }
         }
 

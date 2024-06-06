@@ -19,7 +19,7 @@ export class GBufferFrame extends RTFrame {
         let reDescriptors = this.rtDescriptors;
         let colorBufferTex = RTResourceMap.createRTTexture(key + RTResourceConfig.colorBufferTex_NAME, rtWidth, rtHeight, GPUTextureFormat.rgba16float, false);
         let positionBufferTex = RTResourceMap.createRTTexture(key + RTResourceConfig.positionBufferTex_NAME, rtWidth, rtHeight, GPUTextureFormat.rgba16float, false);
-        let normalBufferTex = RTResourceMap.createRTTexture(key + RTResourceConfig.normalBufferTex_NAME, rtWidth, rtHeight, GPUTextureFormat.rgba8unorm, false);
+        let normalBufferTex = RTResourceMap.createRTTexture(key + RTResourceConfig.normalBufferTex_NAME, rtWidth, rtHeight, GPUTextureFormat.rgba16float, false);
         let materialBufferTex = RTResourceMap.createRTTexture(key + RTResourceConfig.materialBufferTex_NAME, rtWidth, rtHeight, GPUTextureFormat.rgba8unorm, false);
 
         if (GBufferFrame.bufferTexture) {
@@ -32,10 +32,10 @@ export class GBufferFrame extends RTFrame {
         let colorRTDes = new RTDescriptor();
         colorRTDes.loadOp = `clear`;
 
-        let depthTexture = new RenderTexture(rtWidth, rtHeight, GPUTextureFormat.depth24plus, false);
+        let depthTexture = new RenderTexture(rtWidth, rtHeight, GPUTextureFormat.depth24plus_stencil8, false);
         depthTexture.name = `depthTexture`;
-        let depthDec = new RTDescriptor();
-        depthDec.loadOp = `load`;
+        // let depthDec = new RTDescriptor();
+        // depthDec.loadOp = `load`;
         this.depthTexture = depthTexture;
 
         if (GBufferFrame.bufferTexture) {

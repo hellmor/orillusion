@@ -108,20 +108,38 @@ export class WebGPUDescriptorCreator {
             if (renderPassState.zPreTexture) {
                 renderPassState.depthTexture = renderPassState.zPreTexture;
             }
-
-            renderPassDescriptor = {
-                label: `${renderPassState.label} renderPassDescriptor zPreTexture${renderPassState.zPreTexture ? `load` : `clear`}`,
-                colorAttachments: attachMentTexture,
-                depthStencilAttachment: {
-                    view: renderPassState.depthTexture.getGPUView() as GPUTextureView,
-                    depthLoadOp: renderPassState.zPreTexture ? `load` : renderPassState.depthLoadOp,
-                    depthClearValue: renderPassState.zPreTexture ? 1 : renderPassState.depthCleanValue,
-                    depthStoreOp: "store",
-                    // stencilClearValue: 0,
-                    // stencilLoadOp: 'clear',
-                    // stencilStoreOp: 'store',
-                },
-            };
+            if (renderPassState.depthTexture.name.includes('shadowDepthTexture')) {
+                renderPassState.depthTexture.viewDescriptor.aspect = 'depth-only';
+                renderPassDescriptor = {
+                    label: `${renderPassState.label} renderPassDescriptor zPreTexture${renderPassState.zPreTexture ? `load` : `clear`}`,
+                    colorAttachments: attachMentTexture,
+                    depthStencilAttachment: {
+                        view: renderPassState.depthTexture.getGPUView() as GPUTextureView,
+                        depthLoadOp: renderPassState.zPreTexture ? `load` : renderPassState.depthLoadOp,
+                        depthClearValue: 1,//renderPassState.zPreTexture ? 1 : renderPassState.depthCleanValue,
+                        depthStoreOp: 'store',
+                        stencilClearValue: 0,
+                        // stencilLoadOp: 'clear',
+                        // stencilStoreOp: 'store',
+                        // stencilReadOnly: false,
+                    },
+                };
+            } else {
+                renderPassDescriptor = {
+                    label: `${renderPassState.label} renderPassDescriptor zPreTexture${renderPassState.zPreTexture ? `load` : `clear`}`,
+                    colorAttachments: attachMentTexture,
+                    depthStencilAttachment: {
+                        view: renderPassState.depthTexture.getGPUView() as GPUTextureView,
+                        depthLoadOp: renderPassState.zPreTexture ? `load` : renderPassState.depthLoadOp,
+                        depthClearValue: 1,
+                        depthStoreOp: 'store',
+                        stencilClearValue: 0,
+                        stencilLoadOp: 'clear',
+                        stencilStoreOp: 'store',
+                        // stencilReadOnly: false,
+                    },
+                };
+            }
         } else {
             renderPassDescriptor = {
                 colorAttachments: attachMentTexture,

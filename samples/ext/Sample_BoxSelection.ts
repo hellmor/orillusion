@@ -1,5 +1,5 @@
 import { GUIHelp } from "@orillusion/debug/GUIHelp";
-import { Scene3D, View3D, Engine3D, CameraUtil, webGPUContext, HoverCameraController, LitMaterial, BoxGeometry, Object3D, MeshRenderer, DirectLight, KelvinUtil, Color, Vector2, Rect, VertexAttributeName, Vector3, Camera3D, Matrix4 } from "../../src";
+import { Scene3D, View3D, Engine3D, CameraUtil, webGPUContext, HoverCameraController, LitMaterial, BoxGeometry, Object3D, MeshRenderer, DirectLight, KelvinUtil, Color, Vector2, Rect, VertexAttributeName, Vector3, Camera3D, Matrix4, ToothMaterial } from "../../src";
 
 class BoxSelectorJS {
     src_v3: Vector3 = new Vector3();
@@ -82,13 +82,13 @@ class Sample_BoxSelection {
     }
 
 
-    private red: LitMaterial;
-    private green: LitMaterial;
+    private red: ToothMaterial;
+    private green: ToothMaterial;
     private meshRenderers: MeshRenderer[] = [];
     initScene(scene: Scene3D) {
-        this.red = new LitMaterial();
+        this.red = new ToothMaterial();
         this.red.baseColor = new Color(1, 0, 0, 1);
-        this.green = new LitMaterial();
+        this.green = new ToothMaterial();
         this.green.baseColor = new Color(0, 1, 0, 1);
 
         const boxSize = 1;
@@ -122,7 +122,7 @@ class Sample_BoxSelection {
         lightObj3D.rotationZ = 0;
         let directLight = lightObj3D.addComponent(DirectLight);
         directLight.lightColor = KelvinUtil.color_temperature_to_rgb(5355);
-        directLight.castShadow = true;
+        directLight.castShadow = false;
         directLight.intensity = 30;
         this.scene.addChild(lightObj3D);
     }

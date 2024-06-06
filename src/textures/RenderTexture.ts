@@ -90,7 +90,7 @@ export class RenderTexture extends Texture {
                 compare: 'less',
                 label: "sampler_comparison"
             });
-        } else if (this.format == GPUTextureFormat.depth24plus) {
+        } else if (this.format == GPUTextureFormat.depth24plus || this.format == GPUTextureFormat.depth24plus_stencil8) {
             this.samplerBindingLayout = {
                 type: `filtering`,
             }

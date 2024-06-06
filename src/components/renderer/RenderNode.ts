@@ -39,7 +39,7 @@ export class RenderNode extends ComponentBase {
 
     protected _geometry: GeometryBase;
     protected _materials: Material[] = [];
-    protected _castShadow: boolean = true;
+    protected _castShadow: boolean = false;
     protected _castReflection: boolean = false;
     protected _castGI: boolean = false;
     protected _castCollision: boolean = false;

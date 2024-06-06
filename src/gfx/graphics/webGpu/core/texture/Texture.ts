@@ -268,6 +268,9 @@ export class Texture implements GPUSamplerDescriptor {
                 baseMipLevel: 0
             };
         }
+        if (this.format == 'depth24plus-stencil8' || this.format == 'depth32float-stencil8') {
+            this.viewDescriptor.aspect = 'all';
+        }
     }
 
     protected generate(imageBitmap: HTMLCanvasElement | ImageBitmap | OffscreenCanvas) {

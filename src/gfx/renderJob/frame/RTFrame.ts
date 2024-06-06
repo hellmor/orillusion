@@ -11,7 +11,7 @@ export class RTFrame {
     public depthTexture: RenderTexture;
 
     public depthViewIndex: number = 0;
-    public depthCleanValue: number = 1;
+    public depthCleanValue: number = 0;
     public depthLoadOp: GPULoadOp = `clear`;
     public isOutTarget: boolean = true;
 

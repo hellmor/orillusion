@@ -16,6 +16,8 @@ import {
     GeometryBase,
     LitMaterial,
     Color,
+    UnLitMaterial,
+    ToothMaterial,
 } from "@orillusion/core";
 
 import { GUIHelp } from "@orillusion/debug/GUIHelp";
@@ -163,7 +165,9 @@ class Sample_SetPlane {
         cube.addComponent(ColliderComponent);
 
         meshRenderer.geometry = geometry;
-        meshRenderer.material = new LitMaterial();
+        let material = new ToothMaterial();
+
+        meshRenderer.material = material;
 
         GUIHelp.add(this, 'isBottomPlane');
 
@@ -231,7 +235,7 @@ class Sample_SetPlane {
         this.scene.addChild(this.lightObj);
         GUIUtil.renderDirLight(lc, false);
 
-        this.scene.addChild(Object3DUtil.GetSingleCube(400, 0.1, 400, 0.2, 0.2, 0.2))
+        // this.scene.addChild(Object3DUtil.GetSingleCube(400, 0.1, 400, 0.2, 0.2, 0.2))
     }
 
     loop() {

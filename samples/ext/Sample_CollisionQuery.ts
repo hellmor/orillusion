@@ -10,8 +10,8 @@ import {
     CEvent,
     setFrameDelay,
     Color,
-    LitMaterial,
     BoxGeometry,
+    ToothMaterial,
 
 } from "@orillusion/core";
 
@@ -26,11 +26,6 @@ class Sample_CollisionQuery {
     async run() {
         GUIHelp.init();
         this.initCollisionSetting();
-
-
-
-        Engine3D.setting.shadow.shadowSize = 2048
-        Engine3D.setting.shadow.shadowBound = 100;
 
         await Engine3D.init();
 
@@ -50,9 +45,16 @@ class Sample_CollisionQuery {
         this.view.scene = this.scene;
         this.view.camera = mainCamera;
 
-        this.makeFloor();
+        // this.makeFloor();
 
         let duck = await Engine3D.res.loadGltf('PBR/Duck/Duck.gltf');
+        let geometry = duck.getComponents(MeshRenderer)[0].geometry;
+
+        duck = new Object3D();
+        let renderer = duck.addComponent(MeshRenderer);
+        renderer.geometry = geometry;
+        renderer.material = new ToothMaterial();
+
         duck.scaleX = duck.scaleY = duck.scaleZ = 0.2;
         duck.y = 1;
         this.scene.addChild(duck);
@@ -121,8 +123,9 @@ class Sample_CollisionQuery {
     private makeCollisionBox(index: number) {
         let box = new Object3D();
         let renderer = box.addComponent(MeshRenderer);
+        renderer.castShadow = false;
         renderer.geometry = new BoxGeometry(1, 1, 1);
-        renderer.material = new LitMaterial();
+        renderer.material = new ToothMaterial();
         renderer.geometry.name = 'testBox' + index;
         box.scaleX = box.scaleZ = 2;
         box.scaleY = 2;
@@ -134,14 +137,14 @@ class Sample_CollisionQuery {
         return box;
     }
 
-    private makeFloor() {
-        let floor = Object3DUtil.GetSingleCube(
-            CollisionSetting.ViewPortWidth - 1,
-            1,
-            CollisionSetting.ViewPortHeight - 1,
-            0.2, 0.2, 0.2);
-        this.scene.addChild(floor);
-    }
+    // private makeFloor() {
+    //     let floor = Object3DUtil.GetSingleCube(
+    //         CollisionSetting.ViewPortWidth - 1,
+    //         1,
+    //         CollisionSetting.ViewPortHeight - 1,
+    //         0.2, 0.2, 0.2);
+    //     this.scene.addChild(floor);
+    // }
 
     //指定会发生碰撞的Object3D对象
     private enableCollisionObject(objs: Object3D[], enable: boolean) {
@@ -150,6 +153,7 @@ class Sample_CollisionQuery {
             let renderers = obj.getComponents(MeshRenderer);
             for (let renderer of renderers) {
                 renderer.castCollision = enable;
+                renderer.castShadow = false;
                 this._collisionSrcRenderer.push(renderer);
             }
         }
@@ -162,7 +166,7 @@ class Sample_CollisionQuery {
         lightObj.rotationZ = 0;
         let lc = lightObj.addComponent(DirectLight);
         lc.lightColor = KelvinUtil.color_temperature_to_rgb(5355);
-        lc.castShadow = true;
+        lc.castShadow = false;
         lc.intensity = 20;
         lc.indirect = 1
         this.scene.addChild(lightObj);

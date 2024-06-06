@@ -1,10 +1,5 @@
-import { LambertMaterial, RenderShaderPass, PassType, Vector4, Color, Engine3D, Plane3D, ShaderLib, Shader, ToothMaterialUniform_frag, Tooth_Shader, Slice_Shader } from "../..";
+import { LambertMaterial, RenderShaderPass, PassType, Vector4, Color, Engine3D, Plane3D, ShaderLib, Shader, ToothMaterialUniform_frag, Tooth_Shader, Slice_Shader, ToothClipTag } from "../..";
 
-export enum ToothClipTag {
-    None = 0,
-    Positive = 1,
-    Negative = 2,
-}
 /**
  * Lambert Mateiral
  * A non glossy surface material without specular highlights.
