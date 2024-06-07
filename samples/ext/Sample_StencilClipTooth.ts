@@ -3,15 +3,14 @@ import {
     HoverCameraController, Object3D, DirectLight, KelvinUtil, LitMaterial,
     MeshRenderer,
     GeometryBase,
-    StencilSliceMaterial,
-    ToothClipTag,
     Color,
     PlaneGeometry,
     UnLitMaterial,
     BoxGeometry,
 } from "@orillusion/core";
-
 import { GUIHelp } from "@orillusion/debug/GUIHelp";
+import { StencilSliceMaterial } from "./tooth/material/StencilSliceMaterial";
+import { ToothClipTag } from "./tooth/material/ToothClipTag";
 
 class Sample_StencilClipTooth {
     view: View3D;

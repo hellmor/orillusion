@@ -1,5 +1,8 @@
 import { GUIHelp } from "@orillusion/debug/GUIHelp";
-import { Scene3D, View3D, Engine3D, PostProcessingComponent, CameraUtil, Vector3, Object3D, DirectLight, KelvinUtil, MeshRenderer, SphereGeometry, TorusGeometry, Camera3D, HoverCameraController, webGPUContext, SliceController, SlicePostEffect, StencilSliceMaterial } from "../../src";
+import { Scene3D, View3D, Engine3D, PostProcessingComponent, CameraUtil, Vector3, Object3D, DirectLight, KelvinUtil, MeshRenderer, SphereGeometry, TorusGeometry, Camera3D, HoverCameraController, webGPUContext } from "../../src";
+import { SliceController } from './tooth/slice/SliceController'
+import { StencilSliceMaterial } from "./tooth/material/StencilSliceMaterial";
+import { SlicePostEffect } from "./tooth/slice/SlicePostEffect";
 
 
 class Sample_StencilSliceTooth {
@@ -13,12 +16,7 @@ class Sample_StencilSliceTooth {
     camera: Camera3D;
 
     async run() {
-        await Engine3D.init(
-            {
-                beforeRender: () => this.renderUpdate(),
-                lateRender: () => this.lateUpdate(),
-                resumeRender: () => this.isResumeEnable(),
-            });
+        await Engine3D.init();
         GUIHelp.init();
 
         this.scene = new Scene3D();
@@ -33,6 +31,11 @@ class Sample_StencilSliceTooth {
 
         let postProcessing = this.scene.addComponent(PostProcessingComponent);
         this.slicePostEffect = postProcessing.addPost(SlicePostEffect);
+        
+        requestAnimationFrame(()=>{
+            this.controller = this.scene.addComponent(SliceController);
+            this.controller.initController(this.slicePostEffect.sliceBuffer, this.toothMaterial, 0);
+        })
 
         this.initLight();
         await this.initSliceModel();
@@ -95,8 +98,12 @@ class Sample_StencilSliceTooth {
             model.y = 100 + (Math.random()) * 100;
         }
 
-        GUIHelp.add({ sliceIndex: 0 }, 'sliceIndex', 0, this.modelRadius * 2.0, 1).onChange((value) => {
+        GUIHelp.add({ sliceIndex: 0 }, 'sliceIndex', 0, this.modelRadius * 2.0, 0.1).onChange(async (value) => {
             this.controller.sliceIndex = value;
+            Engine3D.pause()
+            let array = await this.controller.read()
+            Engine3D.resume()
+            console.log(array, array.includes(1))
         });
 
         GUIHelp.open();
@@ -122,20 +129,6 @@ class Sample_StencilSliceTooth {
     }
 
     controller: SliceController;
-    lateUpdate() {
-        if (!this.controller) {
-            this.controller = this.scene.addComponent(SliceController);
-            this.controller.initController(this.slicePostEffect.sliceBuffer, this.toothMaterial, this.modelRadius * 2);
-        }
-        this.controller.lateEngineRender();
-    }
-    isResumeEnable() {
-        return !this.controller || !this.controller.isReading;
-    }
-    renderUpdate() {
-
-    }
-
 }
 
 new Sample_StencilSliceTooth().run(); 

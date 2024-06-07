@@ -1,4 +1,4 @@
-import { PostBase, VirtualTexture, RendererPassState, ComputeShader, ComputeGPUBuffer, RTFrame, GBufferFrame, webGPUContext, GPUTextureFormat, RTDescriptor, View3D, WebGPUDescriptorCreator, GPUContext } from "../..";
+import { PostBase, VirtualTexture, RendererPassState, ComputeShader, ComputeGPUBuffer, RTFrame, GBufferFrame, webGPUContext, GPUTextureFormat, RTDescriptor, View3D, WebGPUDescriptorCreator, GPUContext } from "@orillusion/core";
 import { Slice_Cs } from "./Slice_Cs";
 
 export class SlicePostEffect extends PostBase {

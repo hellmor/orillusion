@@ -1,4 +1,6 @@
-import { LambertMaterial, RenderShaderPass, PassType, Vector4, Color, Engine3D, ShaderLib, Shader, ToothClipTag, StencilSliceShader } from "../..";
+import { LambertMaterial, RenderShaderPass, PassType, Vector4, Color, Engine3D, ShaderLib, Shader } from "@orillusion/core";
+import { StencilSliceShader } from "./StencilSliceShader";
+import { ToothClipTag } from "./ToothClipTag";
 
 export class StencilSliceMaterial extends LambertMaterial {
     private _colorPass: RenderShaderPass;
