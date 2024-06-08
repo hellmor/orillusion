@@ -7,10 +7,8 @@ export class SliceController extends ComponentBase {
     up: Vector3 = Vector3.UP;
     position: Vector3 = new Vector3();
     material: StencilSliceMaterial;
-    maxIndex: number;
     planeObj: Object3D;
 
-    indexOffset: number = 0.01;
     private _sliceIndex: number = 0;
     public get sliceIndex(): number {
         return this._sliceIndex;
@@ -19,8 +17,8 @@ export class SliceController extends ComponentBase {
     public set sliceIndex(value: number) {
         if (this._sliceIndex != value) {
             this._sliceIndex = value;
-            this.planeObj.localPosition = new Vector3(0, value + this.indexOffset, 0);
-            this.material.setClipPosition(value + this.indexOffset);
+            this.planeObj.localPosition = new Vector3(0, value, 0);
+            this.material.setClipPosition(value);
         }
     }
 
@@ -31,9 +29,7 @@ export class SliceController extends ComponentBase {
      * @param {number} [indexOffset=0.5] 放置plane的时候，给到半个精度偏移量。放置的模型，在切片层数为0位置由于顶点数据的y都是0，可能会导致没有实心像素点生成。
      * @memberof SliceController
      */
-    public initController(sliceBuffer: ComputeGPUBuffer, material: StencilSliceMaterial, maxIndex: number, indexOffset: number = 0.5) {
-        this.maxIndex = maxIndex;
-        this.indexOffset = indexOffset;
+    public initController(sliceBuffer: ComputeGPUBuffer, material: StencilSliceMaterial) {
         this.sliceBuffer = sliceBuffer;
         this.material = material;
 

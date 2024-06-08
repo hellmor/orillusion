@@ -34,7 +34,7 @@ class Sample_StencilSliceTooth {
         
         requestAnimationFrame(()=>{
             this.controller = this.scene.addComponent(SliceController);
-            this.controller.initController(this.slicePostEffect.sliceBuffer, this.toothMaterial, 0);
+            this.controller.initController(this.slicePostEffect.sliceBuffer, this.toothMaterial);
         })
 
         this.initLight();
