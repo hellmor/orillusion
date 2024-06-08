@@ -459,8 +459,8 @@ export class GPUBufferBase {
     public readBuffer(): Float32Array
     public readBuffer(promise: false) : Float32Array
     public readBuffer(promise: true) : Promise<Float32Array>
-    public readBuffer(promise = false) {
-        this.outFloat32Array ||= new Float32Array(this.memory.shareDataBuffer.byteLength / 4);
+    public readBuffer(promise = false, outArray?: Float32Array) {
+        this.outFloat32Array ||= new Float32Array(this.memory.shareDataBuffer.byteLength / 4)
 
         if (!this._readBuffer) {
             this._readBuffer = webGPUContext.device.createBuffer({
@@ -470,12 +470,12 @@ export class GPUBufferBase {
             });
         }
 
-        let p = this.read();
-        return promise ? p : this.outFloat32Array;
+        let p = this.read(outArray);
+        return promise ? p : outArray ? outArray : this.outFloat32Array;
     }
 
     private _readFlag: boolean = false;
-    private async read() {
+    private async read(outArray?: Float32Array) {
         if (!this._readFlag) {
             this._readFlag = true;
 
@@ -485,11 +485,12 @@ export class GPUBufferBase {
 
             await this._readBuffer.mapAsync(GPUMapMode.READ);
             const copyArrayBuffer = this._readBuffer.getMappedRange();
-            this.outFloat32Array.set(new Float32Array(copyArrayBuffer), 0);
+            const dataView = new Float32Array(copyArrayBuffer);
+            outArray ? outArray.set(dataView, 0) : this.outFloat32Array.set(dataView, 0);
             // this.memory.shareDataBuffer.set(new Float32Array(copyArrayBuffer), 0);
             this._readBuffer.unmap();
             this._readFlag = false;
         }
-        return this.outFloat32Array;
+        return outArray ? outArray : this.outFloat32Array;
     }
 }

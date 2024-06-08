@@ -25,8 +25,6 @@ export class SliceController extends ComponentBase {
     /**
      * @param {ComputeGPUBuffer} sliceBuffer 读取buffer的数据源
      * @param {StencilSliceMaterial} material clip牙齿的材质球
-     * @param {number} maxIndex 切片最大层数，将从0~maxIndex逐层处理。一共切100次。
-     * @param {number} [indexOffset=0.5] 放置plane的时候，给到半个精度偏移量。放置的模型，在切片层数为0位置由于顶点数据的y都是0，可能会导致没有实心像素点生成。
      * @memberof SliceController
      */
     public initController(sliceBuffer: ComputeGPUBuffer, material: StencilSliceMaterial) {
@@ -64,9 +62,6 @@ export class SliceController extends ComponentBase {
 
     public async read(){
         let srcArray = await this.sliceBuffer.readBuffer(true)
-        let totalCount = srcArray.length;
-        let array = new Uint8Array(totalCount);
-        array.set(srcArray)
-        return array
+        return srcArray
     }
 }
