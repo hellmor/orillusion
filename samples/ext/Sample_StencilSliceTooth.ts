@@ -1,5 +1,5 @@
 import { GUIHelp } from "@orillusion/debug/GUIHelp";
-import { Scene3D, View3D, Engine3D, PostProcessingComponent, CameraUtil, Vector3, Object3D, DirectLight, KelvinUtil, MeshRenderer, SphereGeometry, TorusGeometry, Camera3D, HoverCameraController, webGPUContext } from "../../src";
+import { Scene3D, View3D, Engine3D, PostProcessingComponent, CameraUtil, Vector3, Object3D, DirectLight, KelvinUtil, MeshRenderer, SphereGeometry, TorusGeometry, Camera3D, HoverCameraController, webGPUContext, GeometryBase } from "../../src";
 import { SliceController } from './tooth/slice/SliceController'
 import { StencilSliceMaterial } from "./tooth/material/StencilSliceMaterial";
 import { SlicePostEffect } from "./tooth/slice/SlicePostEffect";
@@ -25,6 +25,11 @@ class Sample_StencilSliceTooth {
         this.view.scene = this.scene;
         this.view.camera = this.camera;
 
+        this.initLight();
+
+        this.toothMaterial = this.createMaterial()
+        
+
         Engine3D.startRenderView(this.view);
 
         this.validCamera();
@@ -32,13 +37,12 @@ class Sample_StencilSliceTooth {
         let postProcessing = this.scene.addComponent(PostProcessingComponent);
         this.slicePostEffect = postProcessing.addPost(SlicePostEffect);
         
-        requestAnimationFrame(()=>{
+        await this.initSliceModel();
+
+        requestAnimationFrame(() => {
             this.controller = this.scene.addComponent(SliceController);
             this.controller.initController(this.slicePostEffect.sliceBuffer, this.toothMaterial);
         })
-
-        this.initLight();
-        await this.initSliceModel();
 
         GUIHelp.add(this, 'IsOrthCamera').onChange(() => this.validCamera());
     }
@@ -70,33 +74,15 @@ class Sample_StencilSliceTooth {
     }
 
 
-    initSliceModel() {
-        let material = this.createMaterial();
+    async initSliceModel() {
 
-        for (let i = 0; i < 5; i++) {
-            let model = new Object3D();
-            model.y = this.modelRadius;
-            this.scene.addChild(model);
-            let renderer = model.addComponent(MeshRenderer);
-            renderer.geometry = new SphereGeometry(this.modelRadius * 0.4 * (Math.random() + 0.5), 40, 40);
-            renderer.material = material;
-            model.x = (Math.random() - 0.5) * 200;
-            model.z = (Math.random() - 0.5) * 200;
-            model.y = 100 + (Math.random()) * 100;
+        let obj = new Object3D();
+        let renderer = obj.addComponent(MeshRenderer);
+        renderer.geometry = await this.loadToothMesh();
+        renderer.material = this.toothMaterial;
 
-        }
+        this.scene.addChild(obj);
 
-        for (let i = 0; i < 10; i++) {
-            let model = new Object3D();
-            model.y = this.modelRadius;
-            this.scene.addChild(model);
-            let renderer = model.addComponent(MeshRenderer);
-            renderer.geometry = new TorusGeometry(this.modelRadius * 0.4 * (Math.random() + 0.5), 10 + Math.random() * 20, 20, 20);
-            renderer.material = material;
-            model.x = (Math.random() - 0.5) * 50;
-            model.z = (Math.random() - 0.5) * 50;
-            model.y = 100 + (Math.random()) * 100;
-        }
 
         GUIHelp.add({ sliceIndex: 0 }, 'sliceIndex', 0, this.modelRadius * 2.0, 0.1).onChange(async (value) => {
             this.controller.sliceIndex = value;
@@ -107,6 +93,12 @@ class Sample_StencilSliceTooth {
         });
 
         GUIHelp.open();
+    }
+
+    async loadToothMesh(): Promise<GeometryBase> {
+        let model = await Engine3D.res.loadGltf('test.temp.gltf');
+        let renderer = model.getComponentsInChild(MeshRenderer)[0];
+        return renderer.geometry;
     }
 
     createMaterial() {

@@ -458,7 +458,7 @@ export class GPUBufferBase {
 
     public readBuffer(): Float32Array
     public readBuffer(promise: false) : Float32Array
-    public readBuffer(promise: true) : Promise<Float32Array>
+    public readBuffer(promise: true, outArray?: Float32Array) : Promise<Float32Array>
     public readBuffer(promise = false, outArray?: Float32Array) {
         this.outFloat32Array ||= new Float32Array(this.memory.shareDataBuffer.byteLength / 4)
 
