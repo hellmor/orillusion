@@ -140,12 +140,21 @@ export class PickFire extends CEventDispatcher {
     private _lastFocus: ColliderComponent;
 
     private getPickInfo() {
-        return {
-            worldPos: this._pickCompute.getPickWorldPosition(),
-            screenUv: this._pickCompute.getPickScreenUV(),
-            meshID: this._pickCompute.getPickMeshID(),
-            worldNormal: this._pickCompute.getPickWorldNormal(),
-        };
+        if(Engine3D.setting.pick.mode == `pixel`)
+            return {
+                worldPos: this._pickCompute.getPickWorldPosition(),
+                screenUv: this._pickCompute.getPickScreenUV(),
+                meshID: this._pickCompute.getPickMeshID(),
+                worldNormal: this._pickCompute.getPickWorldNormal(),
+            };
+        else{
+            let intersection = this._interestList[0]
+            return {
+                worldPos: intersection.intersectPoint,
+                distance: intersection.distance,
+                collider: intersection.collider
+            };
+        }
     }
 
     private onTouchMove(e: PointerEvent3D) {
@@ -197,7 +206,7 @@ export class PickFire extends CEventDispatcher {
         this.pick(this._view.camera);
         let target = this.findNearestObj(this._interestList, this._view.camera);
         if (target) {
-            let info = Engine3D.setting.pick.mode == `pixel` ? this.getPickInfo() : null;
+            let info = this.getPickInfo();
             Object.assign(this._pickEvent, e);
             this._pickEvent.type = PointerEvent3D.PICK_CLICK;
             this._pickEvent.target = target.object3D;
