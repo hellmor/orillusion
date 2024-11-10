@@ -9,7 +9,7 @@ import { ColliderComponent } from '../components/ColliderComponent';
 import { View3D } from '../core/View3D';
 import { PointerEvent3D } from '../event/eventConst/PointerEvent3D';
 import { HitInfo } from '../components/shape/ColliderShape';
-import { ComponentCollect } from '..';
+import { ComponentCollect, Matrix4 } from '..';
 
 /**
  * Management and triggering for picking 3D objects
@@ -143,16 +143,17 @@ export class PickFire extends CEventDispatcher {
         if(Engine3D.setting.pick.mode == `pixel`)
             return {
                 worldPos: this._pickCompute.getPickWorldPosition(),
+                worldNormal: this._pickCompute.getPickWorldNormal(),
                 screenUv: this._pickCompute.getPickScreenUV(),
                 meshID: this._pickCompute.getPickMeshID(),
-                worldNormal: this._pickCompute.getPickWorldNormal(),
             };
         else{
             let intersection = this._interestList[0]
             return {
                 worldPos: intersection.intersectPoint,
+                worldNormal: intersection.normal,
+                meshID: intersection.collider.transform.worldMatrix.index,
                 distance: intersection.distance,
-                collider: intersection.collider
             };
         }
     }
