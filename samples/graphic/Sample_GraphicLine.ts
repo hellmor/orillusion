@@ -58,6 +58,7 @@ class Sample_GraphicLine {
         this.graphic3D.drawCircle('Circle1', new Vector3(-15, -5, -5), 5, 15, Vector3.X_AXIS, new Color().hexToRGB(Color.GREEN));
         this.graphic3D.drawCircle('Circle2', new Vector3(-15, -5, -5), 5, 15, Vector3.Y_AXIS, new Color().hexToRGB(Color.GREEN));
         this.graphic3D.drawCircle('Circle3', new Vector3(-15, -5, -5), 5, 15, Vector3.Z_AXIS, new Color().hexToRGB(Color.GREEN));
+        this.graphic3D.drawCircle('Circle4', new Vector3(-15, -5, -5), 5, 15, new Vector3(1, 1, 0), new Color().hexToRGB(Color.GREEN));
     }
 }
 
