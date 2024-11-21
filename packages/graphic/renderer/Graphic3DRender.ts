@@ -437,8 +437,8 @@ export class Graphic3D extends Object3D {
      * Erase all drawn graphics
      */
     public ClearAll() {
-        this.mLineRender.shapes.clear();
-        this.mFillRender.shapes.clear();
+        this.mLineRender.clear();
+        this.mFillRender.clear();
     }
 
     /**
