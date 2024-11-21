@@ -427,7 +427,8 @@ export class Engine3D {
      * Resume the engine render
      */
     public static resume() {
-        this._requestAnimationFrameID = requestAnimationFrame((t) => this.render(t));
+        if(this._requestAnimationFrameID == 0)
+            this._requestAnimationFrameID = requestAnimationFrame((t) => this.render(t));
     }
 
     /**
