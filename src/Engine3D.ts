@@ -427,7 +427,7 @@ export class Engine3D {
      * Resume the engine render
      */
     public static resume() {
-        if(this._requestAnimationFrameID == 0)
+        if(this._requestAnimationFrameID === 0)
             this._requestAnimationFrameID = requestAnimationFrame((t) => this.render(t));
     }
 
@@ -450,8 +450,8 @@ export class Engine3D {
             this._time = time;
         }
         await this.updateFrame(time);
+        this._requestAnimationFrameID = 0;
         this.resume()
-
     }
 
     private static async updateFrame(time: number) {
