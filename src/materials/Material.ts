@@ -152,6 +152,14 @@ export class Material {
         this._defaultSubShader.topology = value;
     }
 
+    public set baseColor(color: Color) {
+        this.shader.setUniformColor(`baseColor`, color);
+    }
+
+    public get baseColor() {
+        return this.shader.getUniformColor("baseColor");
+    }
+
     /**
      * get render pass by renderType
      * @param passType 
