@@ -71,7 +71,7 @@ export class Graphics3DShape {
         this.fillShapeData(points, color);
     }
 
-    public fillShapeData(points: Vector3[], colors: Color | Color[], forceUpdate: boolean = false) {
+    public fillShapeData(points: Vector3[], colors: Color | Color[], forceUpdate: boolean = true) {
         if (!this.pointData) {
             this.pointData = new Float32Array(4 * points.length);
             this.colorData = new Float32Array(4 * points.length);
