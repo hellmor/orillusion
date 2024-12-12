@@ -191,7 +191,7 @@ export class Material {
     destroy(force: boolean) {
         this.name = null;
         this.instanceID = null;
-        this._shader.destroy();
+        this._shader.destroy(force);
         this._shader = null;
     }
 
