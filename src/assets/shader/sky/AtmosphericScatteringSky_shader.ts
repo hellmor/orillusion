@@ -26,7 +26,6 @@ export class AtmosphericScatteringSky_shader {
       var<private> fragCoord: vec2<i32>;
       var<private> texSizeF32: vec2<f32>;
 
-      var<private> HALF_PI:f32 = 1.5707963;
       var<private> PI:f32 = 3.1415926535;
       var<private> PI_2:f32 = 0.0;
       var<private> EPSILON:f32 = 0.0000001;
@@ -246,8 +245,8 @@ export class AtmosphericScatteringSky_shader {
 
         var sky: vec3<f32> = (insctrTotalMie + insctrTotalRayleigh) * setting.sunRadiance;
         if(uniformBuffer.displaySun > 0.5){
-          var angle:f32 = saturate((1.0 - phaseTheta) * setting.sunRadius);
-          var cosAngle:f32 = cos(angle * HALF_PI);
+          var angle:f32 = clamp((1.0 - phaseTheta) * setting.sunRadius, 0.0000001, 0.9999999);
+          var cosAngle:f32 = cos(angle * PI * 0.5);
           var edge:f32 = 0.0;
           if(angle >= 0.9){
             edge = smoothstep(0.9, 1.0, angle);
