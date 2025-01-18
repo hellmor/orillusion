@@ -1,4 +1,4 @@
-import { Engine3D, Scene3D, AtmosphericComponent, HoverCameraController, Object3D, MeshRenderer, BoxGeometry, LitMaterial, DirectLight, View3D, Camera3D, GridObject, Frustum, OrbitController, Vector3, Color, AxisObject } from "@orillusion/core";
+import { Engine3D, Scene3D, AtmosphericComponent, HoverCameraController, Object3D, MeshRenderer, BoxGeometry, LitMaterial, DirectLight, View3D, Camera3D, Frustum, OrbitController, Vector3, Color, AxisObject, GridObject } from "@orillusion/core";
 import { Stats } from "@orillusion/stats";
 import * as dat from "dat.gui"
 
@@ -65,9 +65,7 @@ box2.x = 1
 scene3D.addChild(box2);
 
 scene3D.addChild(new AxisObject(10));
-// add a grid
-let grid = new GridObject(1000, 100);
-scene3D.addChild(grid)
+scene3D.addChild(new GridObject(1000, 100));
 
 // create a view with target scene and camera
 let view = new View3D();
@@ -80,33 +78,23 @@ Engine3D.startRenderView(view);
 let gui = new dat.GUI();
 let f = gui.addFolder('Camera')
 let options = {
-    near: 0.1,
-    far: 1000,
-    fov: 45,
-    frustumSize: 10,
     'ortho': () => {
-        options.near = -1000
-        options.far = 1000
-        camera.ortho(options.frustumSize, options.near, options.far)
+        camera.near = -100
+        camera.ortho(camera.frustumSize, camera.near, camera.far)
     },
     'perspective': () => {
-        options.near = 0.1
-        options.far = 1000
-        camera.perspective(options.fov, camera.aspect, options.near, options.far)
+        camera.near = 0.1
+        camera.perspective(camera.fov, camera.aspect, camera.near, camera.far)
     }
 }
-f.add(options, 'near', -1000, 100).listen().onChange(() => {
-    camera.type === 1 ?
-        camera.perspective(options.fov, camera.aspect, options.near, options.far) :
-        camera.ortho(options.frustumSize, options.near, options.far)
+f.add(camera, 'near', 0.1, 100).listen().onChange(() => {
+    camera.type === 1 ? options.perspective() : options.ortho()
 })
-f.add(options, 'far', 0, 1000).listen().onChange(() => {
-    camera.type === 1 ?
-        camera.perspective(options.fov, camera.aspect, options.near, options.far) :
-        camera.ortho(options.frustumSize, options.near, options.far)
+f.add(camera, 'far', 1, 1000).listen().onChange(() => {
+    camera.type === 1 ? options.perspective() : options.ortho()
 })
 f.add(options, 'perspective')
-f.add(options, 'fov', 1, 179).onChange(() => camera.perspective(options.fov, camera.aspect, options.near, options.far))
+f.add(camera, 'fov', 1, 179).listen().onChange(() => options.perspective())
 f.add(options, 'ortho')
-f.add(options, 'frustumSize', 0.1, 2000).onChange(() => camera.ortho(options.frustumSize, options.near, options.far))
+f.add(camera, 'frustumSize', 1, 200).listen().onChange(() => options.ortho())
 f.open()
