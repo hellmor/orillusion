@@ -209,8 +209,8 @@ export class OrbitController extends ComponentBase {
      * @internal
      */
     private onWheel(e: PointerEvent3D) {
-        e.deltaY = clamp(e.deltaY, -this._spherical.radius, this._spherical.radius)
-        this._spherical.radius += e.deltaY * this.zoomFactor;
+        let deltaY = clamp(e.deltaY, -this._spherical.radius, this._spherical.radius)
+        this._spherical.radius += deltaY * this.zoomFactor;
         this._spherical.radius = clamp(this._spherical.radius, this.minDistance, this.maxDistance);
         this.updateCamera();
 

@@ -79,8 +79,7 @@ let gui = new dat.GUI();
 let f = gui.addFolder('Camera')
 let options = {
     'ortho': () => {
-        camera.near = -100
-        camera.ortho(camera.frustumSize, camera.near, camera.far)
+        camera.ortho(camera.frustumSize || 50, camera.frustumDepth || 100)
     },
     'perspective': () => {
         camera.near = 0.1
@@ -97,4 +96,5 @@ f.add(options, 'perspective')
 f.add(camera, 'fov', 1, 179).listen().onChange(() => options.perspective())
 f.add(options, 'ortho')
 f.add(camera, 'frustumSize', 1, 200).listen().onChange(() => options.ortho())
+f.add(camera, 'frustumDepth', 1, 200).listen().onChange(() => options.ortho())
 f.open()

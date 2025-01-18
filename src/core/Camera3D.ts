@@ -70,7 +70,8 @@ export class Camera3D extends ComponentBase {
     /**
      * orth view size
      */
-    public frustumSize: number = 100;
+    public frustumSize: number = 0;
+    public frustumDepth: number = 0;
 
     /**
      * camera view port size
@@ -176,8 +177,10 @@ export class Camera3D extends ComponentBase {
         if (this.type == CameraType.perspective) {
             this.perspective(this.fov, this.aspect, this.near, this.far);
         }else if(this.type == CameraType.ortho) {
-            if(this.frustumSize)
-                this.ortho(this.frustumSize, this.near, this.far);
+            if(this.frustumSize && this.frustumDepth)
+                this.ortho(this.frustumSize, this.frustumDepth);
+            else if(this.frustumSize)
+                this.ortho2(this.frustumSize, this.near, this.far);
             else
                 this.orthoOffCenter(this.left, this.right, this.bottom, this.top, this.near, this.far);
         }  
@@ -242,12 +245,34 @@ export class Camera3D extends ComponentBase {
     }
 
     /**
-     * set an orthographic camera with a frustumSize
-     * @param frustumSize the frustum size 
+     * set an orthographic camera with a frustumSize(viewHeight) and frustumSizeDepth
+     * @param frustumSize the frustum view height
+     * @param frustumSizeDepth the frustum view depth
+     */
+    public ortho(frustumSize: number, frustumDepth: number) {
+        this.frustumSize = frustumSize;
+        this.frustumDepth = frustumDepth;
+        
+        let w = frustumSize * this.aspect;
+        let h = frustumSize;
+        let left = -w / 2;
+        let right = w / 2;
+        let top = h / 2;
+        let bottom = -h / 2;
+
+        let dis = Vector3.distance(this.object3D.localPosition, this.lookTarget)
+        let near = dis - frustumDepth
+        let far = dis + frustumDepth
+
+        this.orthoOffCenter(left, right, bottom, top, near, far);
+    }
+    /**
+     * set an orthographic camera with a frustumSize(viewHeight) and specific near & far
+     * @param frustumSize the frustum view height
      * @param near camera near plane
      * @param far camera far plane
      */
-    public ortho(frustumSize: number, near: number, far: number) {
+    public ortho2(frustumSize: number, near: number, far: number) {
         this.frustumSize = frustumSize;
         let w = frustumSize * this.aspect;
         let h = frustumSize;
@@ -255,9 +280,10 @@ export class Camera3D extends ComponentBase {
         let right = w / 2;
         let top = h / 2;
         let bottom = -h / 2;
+
         this.orthoOffCenter(left, right, bottom, top, near, far);
     }
-
+    
     /**
      * set an orthographic camera with specified frustum space
      * @param left camera left plane
