@@ -85,8 +85,8 @@ let options = {
     fov: 45,
     frustumSize: 10,
     'ortho': () => {
-        options.near = -100
-        options.far = 100
+        options.near = -1000
+        options.far = 1000
         camera.ortho(options.frustumSize, options.near, options.far)
     },
     'perspective': () => {
