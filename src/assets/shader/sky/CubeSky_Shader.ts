@@ -40,6 +40,7 @@ export class CubeSky_Shader {
       fixViewMat[3].z = 0.0 ;
 
       var clipPos = fixProjMat * fixViewMat * ORI_VertexOut.vWorldPos;
+      clipPos.z = clipPos.w;
       ORI_VertexOut.vClipPos = clipPos ;
       ORI_VertexOut.member = clipPos;
       return ORI_VertexOut;

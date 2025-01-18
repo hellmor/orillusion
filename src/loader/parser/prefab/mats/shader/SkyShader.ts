@@ -22,9 +22,9 @@ export class SkyShader extends Shader {
         colorShader.setUniformFloat(`roughness`, 0.0);
 
         let shaderState = colorShader.shaderState;
-        shaderState.frontFace = `cw`;
-        shaderState.cullMode = GPUCullMode.back;
+        shaderState.frontFace = `ccw`;
+        shaderState.cullMode = GPUCullMode.front;
         shaderState.depthWriteEnabled = false;
-        shaderState.depthCompare = GPUCompareFunction.less;
+        shaderState.depthCompare = GPUCompareFunction.less_equal;
     }
 }
