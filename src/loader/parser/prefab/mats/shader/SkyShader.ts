@@ -27,6 +27,7 @@ export class SkyShader extends Shader {
         shaderState.depthCompare = GPUCompareFunction.less_equal;
     }
 
+    //fix orth matrix
     public fixOrthProj(enable: boolean, aspect: number, near: number, far: number) {
         const cacheData = this._cacheData;
         if (cacheData.enable != enable
